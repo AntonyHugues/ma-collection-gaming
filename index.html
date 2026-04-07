@@ -10,18 +10,34 @@
     color: #e0f7ff;
     padding: 20px;
   }
-  h1, h2 { color: #00cfff; text-align: center; }
+  h1, h2 {
+    color: #00cfff;
+    text-align: center;
+  }
   select {
-    padding: 10px 15px; font-size: 16px; border-radius: 8px; border: none;
-    background: #12325b; color: #e0f7ff; margin-bottom: 20px; cursor: pointer;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: #12325b;
+    color: #e0f7ff;
+    margin-bottom: 20px;
+    cursor: pointer;
   }
   select:hover { background: #1457a8; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 0 10px #00cfff66; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    box-shadow: 0 0 10px #00cfff66;
+  }
   th, td { padding: 12px; text-align: left; }
   th { background-color: #12325b; color: #00cfff; }
   tr:nth-child(even) { background-color: #0f2a4c; }
   tr:hover { background-color: #1457a8; transition: 0.3s; cursor: default; }
-  td { color: #e0f7ff; }
+  td { color: #e0f7ff; vertical-align: middle; }
+  td img.game-img { width: 60px; height: auto; border-radius: 5px; margin-right: 10px; vertical-align: middle; }
+  td img.logo { width: 24px; height: 24px; margin-right: 8px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -39,14 +55,14 @@
 </div>
 
 <table id="jeuxTable">
-  <!-- Entête et lignes seront générées automatiquement -->
+  <!-- Entête et lignes générées automatiquement -->
 </table>
 
 <script>
 // Charger les données depuis jeux.json
 let jeuxData = [];
 
-fetch('data/jeux.json')
+fetch('jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
@@ -57,7 +73,7 @@ fetch('data/jeux.json')
 // Affiche les jeux dans le tableau
 function afficherJeux(jeux, cacherConsole) {
   const table = document.getElementById('jeuxTable');
-  table.innerHTML = ''; // reset
+  table.innerHTML = '';
 
   // Créer l'entête
   const header = table.insertRow();
@@ -68,8 +84,32 @@ function afficherJeux(jeux, cacherConsole) {
   // Ajouter les lignes
   jeux.forEach(jeu => {
     const row = table.insertRow();
-    row.insertCell(0).textContent = jeu.nom;
-    if (!cacherConsole) row.insertCell(1).textContent = jeu.console;
+
+    // Cellule Nom avec logo
+    const nameCell = row.insertCell(cacherConsole ? 0 : 1);
+    const logo = document.createElement('img');
+    logo.src = jeu.logo;
+    logo.className = "logo";
+
+    // Image du jeu
+    const gameImg = document.createElement('img');
+    gameImg.src = jeu.image;
+    gameImg.className = "game-img";
+
+    const span = document.createElement('span');
+    span.textContent = jeu.nom;
+
+    nameCell.appendChild(gameImg);
+    nameCell.appendChild(logo);
+    nameCell.appendChild(span);
+
+    // Console (si visible)
+    if (!cacherConsole) {
+      const consoleCell = row.insertCell(1);
+      consoleCell.textContent = jeu.console;
+    }
+
+    // Statut
     row.insertCell(cacherConsole ? 1 : 2).textContent = jeu.statut;
   });
 }
