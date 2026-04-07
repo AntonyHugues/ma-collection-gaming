@@ -3,7 +3,6 @@
     "nom": "Zelda: Breath of the Wild",
     "console": "Nintendo Switch",
     "statut": "Terminé"
-    "image": "images/nintendo-switch/zelda.jpg",
     "logo": "images/nintendo-switch/logo-nintendo-switch.png"
   },
   {
@@ -23,10 +22,5 @@
     "console": "PS5",
     "statut": "Pas commencé"
     "logo": "images/ps5/logo-ps5.png"
-  },
-  {
-    "nom": "Halo Infinite",
-    "console": "Xbox Series X",
-    "statut": "En cours"
   }
 ]
