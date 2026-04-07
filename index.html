@@ -39,11 +39,7 @@
 </div>
 
 <table id="jeuxTable">
-  <tr>
-    <th>Nom du jeu</th>
-    <th>Console</th>
-    <th>Statut</th>
-  </tr>
+  <!-- Entête et lignes seront générées automatiquement -->
 </table>
 
 <script>
@@ -54,24 +50,22 @@ fetch('jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
-    afficherJeux(jeuxData);
+    afficherJeux(jeuxData, false);
   })
   .catch(err => console.error('Erreur:', err));
 
 // Affiche les jeux dans le tableau
-function afficherJeux(jeux, cacherConsole = false) {
+function afficherJeux(jeux, cacherConsole) {
   const table = document.getElementById('jeuxTable');
+  table.innerHTML = ''; // reset
 
-  // Supprime toutes les lignes sauf l'entête
-  table.innerHTML = '';
-
-  // Crée l'entête
+  // Créer l'entête
   const header = table.insertRow();
   header.insertCell(0).outerHTML = "<th>Nom du jeu</th>";
   if (!cacherConsole) header.insertCell(1).outerHTML = "<th>Console</th>";
   header.insertCell(cacherConsole ? 1 : 2).outerHTML = "<th>Statut</th>";
 
-  // Ajoute les lignes
+  // Ajouter les lignes
   jeux.forEach(jeu => {
     const row = table.insertRow();
     row.insertCell(0).textContent = jeu.nom;
@@ -86,7 +80,8 @@ function filtrerJeux() {
   if (valeur === "all") {
     afficherJeux(jeuxData, false);
   } else {
-    afficherJeux(jeuxData.filter(j => j.console === valeur), true);
+    const filtered = jeuxData.filter(j => j.console === valeur);
+    afficherJeux(filtered, true);
   }
 }
 </script>
