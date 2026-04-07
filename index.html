@@ -36,7 +36,6 @@
   tr:nth-child(even) { background-color: #0f2a4c; }
   tr:hover { background-color: #1457a8; transition: 0.3s; cursor: default; }
   td { color: #e0f7ff; vertical-align: middle; }
-  td img.game-img { width: 60px; height: auto; border-radius: 5px; margin-right: 10px; vertical-align: middle; }
   td img.logo { width: 24px; height: 24px; margin-right: 8px; vertical-align: middle; }
 </style>
 </head>
@@ -55,13 +54,13 @@
 </div>
 
 <table id="jeuxTable">
-  <!-- Entête et lignes générées automatiquement -->
+  <!-- Contenu généré automatiquement -->
 </table>
 
 <script>
-// Charger les données depuis jeux.json
 let jeuxData = [];
 
+// Charger les données depuis data/jeux.json
 fetch('data/jeux.json')
   .then(response => response.json())
   .then(data => {
@@ -70,36 +69,29 @@ fetch('data/jeux.json')
   })
   .catch(err => console.error('Erreur:', err));
 
-// Affiche les jeux dans le tableau
 function afficherJeux(jeux, cacherConsole) {
   const table = document.getElementById('jeuxTable');
   table.innerHTML = '';
 
-  // Créer l'entête
+  // Entête
   const header = table.insertRow();
   header.insertCell(0).outerHTML = "<th>Nom du jeu</th>";
   if (!cacherConsole) header.insertCell(1).outerHTML = "<th>Console</th>";
   header.insertCell(cacherConsole ? 1 : 2).outerHTML = "<th>Statut</th>";
 
-  // Ajouter les lignes
+  // Lignes
   jeux.forEach(jeu => {
     const row = table.insertRow();
 
-    // Cellule Nom avec logo
+    // Nom + logo
     const nameCell = row.insertCell(cacherConsole ? 0 : 1);
     const logo = document.createElement('img');
-    logo.src = jeu.logo;
+    logo.src = jeu.logo; // logo obligatoire dans jeux.json
     logo.className = "logo";
-
-    // Image du jeu
-    const gameImg = document.createElement('img');
-    gameImg.src = jeu.image;
-    gameImg.className = "game-img";
 
     const span = document.createElement('span');
     span.textContent = jeu.nom;
 
-    nameCell.appendChild(gameImg);
     nameCell.appendChild(logo);
     nameCell.appendChild(span);
 
@@ -114,7 +106,6 @@ function afficherJeux(jeux, cacherConsole) {
   });
 }
 
-// Filtrer les jeux par console
 function filtrerJeux() {
   const valeur = document.getElementById("consoleSelect").value;
   if (valeur === "all") {
