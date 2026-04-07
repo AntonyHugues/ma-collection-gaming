@@ -4,33 +4,11 @@
 <meta charset="UTF-8">
 <title>Ma Collection Gaming</title>
 <style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #0b1e3b;
-    color: #e0f7ff;
-    padding: 20px;
-  }
-  h1, h2 {
-    color: #00cfff;
-    text-align: center;
-  }
-  select {
-    padding: 10px 15px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    background: #12325b;
-    color: #e0f7ff;
-    margin-bottom: 20px;
-    cursor: pointer;
-  }
+  body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
+  h1, h2 { color: #00cfff; text-align: center; }
+  select { padding: 10px 15px; font-size: 16px; border-radius: 8px; border: none; background: #12325b; color: #e0f7ff; margin-bottom: 20px; cursor: pointer; }
   select:hover { background: #1457a8; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    box-shadow: 0 0 10px #00cfff66;
-  }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 0 10px #00cfff66; }
   th, td { padding: 12px; text-align: left; }
   th { background-color: #12325b; color: #00cfff; }
   tr:nth-child(even) { background-color: #0f2a4c; }
@@ -53,19 +31,17 @@
   </select>
 </div>
 
-<table id="jeuxTable">
-  <!-- Contenu généré automatiquement -->
-</table>
+<table id="jeuxTable"></table>
 
 <script>
 let jeuxData = [];
 
-// Charger les données depuis data/jeux.json
 fetch('data/jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
 
+    // Tri alphabétique par nom
     jeuxData.sort((a, b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity: 'base'}));
 
     afficherJeux(jeuxData, false);
@@ -78,34 +54,33 @@ function afficherJeux(jeux, cacherConsole) {
 
   // Entête
   const header = table.insertRow();
-  header.insertCell(0).outerHTML = "<th>Nom du jeu</th>";
-  if (!cacherConsole) header.insertCell(1).outerHTML = "<th>Console</th>";
-  header.insertCell(cacherConsole ? 1 : 2).outerHTML = "<th>Statut</th>";
+  const thNom = document.createElement('th'); thNom.textContent = "Nom du jeu"; header.appendChild(thNom);
+  if (!cacherConsole) { const thConsole = document.createElement('th'); thConsole.textContent = "Console"; header.appendChild(thConsole); }
+  const thStatut = document.createElement('th'); thStatut.textContent = "Statut"; header.appendChild(thStatut);
 
   // Lignes
   jeux.forEach(jeu => {
     const row = table.insertRow();
 
     // Nom + logo
-    const nameCell = row.insertCell(cacherConsole ? 0 : 1);
+    const nameCell = row.insertCell();
     const logo = document.createElement('img');
-    logo.src = jeu.logo; // logo obligatoire dans jeux.json
+    logo.src = jeu.logo;
     logo.className = "logo";
-
     const span = document.createElement('span');
     span.textContent = jeu.nom;
-
     nameCell.appendChild(logo);
     nameCell.appendChild(span);
 
     // Console (si visible)
     if (!cacherConsole) {
-      const consoleCell = row.insertCell(1);
+      const consoleCell = row.insertCell();
       consoleCell.textContent = jeu.console;
     }
 
     // Statut
-    row.insertCell(cacherConsole ? 1 : 2).textContent = jeu.statut;
+    const statutCell = row.insertCell();
+    statutCell.textContent = jeu.statut;
   });
 }
 
