@@ -6,38 +6,66 @@
 <style>
   body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
   h1, h2 { color: #00cfff; text-align: center; }
-  select { padding: 10px 15px; font-size: 16px; border-radius: 8px; border: none; background: #12325b; color: #e0f7ff; margin-bottom: 20px; cursor: pointer; }
-  select:hover { background: #1457a8; }
+
+  /* Cartes constructeur */
+  .card {
+    display: inline-block;
+    padding: 20px;
+    margin: 10px;
+    background: #12325b;
+    color: #00cfff;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.3s;
+  }
+
+  .card:hover {
+    background: #1457a8;
+    transform: scale(1.05);
+  }
+
+  select {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: #12325b;
+    color: #e0f7ff;
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+
   table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 0 10px #00cfff66; }
   th, td { padding: 12px; text-align: left; }
   th { background-color: #12325b; color: #00cfff; }
   tr:nth-child(even) { background-color: #0f2a4c; }
-  tr:hover { background-color: #1457a8; transition: 0.3s; cursor: default; }
+  tr:hover { background-color: #1457a8; transition: 0.3s; }
   td { color: #e0f7ff; vertical-align: middle; }
-  td img.logo { width: 24px !important; height: 24px !important; object-fit: contain; margin-right: 8px; vertical-align: middle; }
+
+  td img.logo {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
 
 <h1>🎮 Ma Collection Gaming</h1>
-<h2>Filtrer les jeux par console :</h2>
 
-<div style="text-align: center;">
-  <select id="consoleSelect" onchange="filtrerJeux()">
-    <option value="all">Toutes les consoles</option>
-    <option value="NES">Nintendo Entertainment System</option>
-    <option value="Super Nintendo">Super Nintendo</option>
-    <option value="N64">Nintendo 64
-    <option value="Game Cube">game cube
-    <option value="WII">Nintendo wii
-    <option value="WII U">Nintendo wii u
-    <option value="Nintendo Switch">Nintendo Switch</option>
-    <option value="PS1">PlayStation 1</option>
-    <option value="PS2">PlayStation 2</option>
-    <option value="PS3">PlayStation 3</option>
-    <option value="PS4">PlayStation 4</option>
-    <option value="PS5">PlayStation 5</option>
-  </select>
+<h2>Choisir un constructeur :</h2>
+
+<div style="text-align:center;">
+  <div class="card" onclick="choisirConstructeur('nintendo')">🎮 Nintendo</div>
+  <div class="card" onclick="choisirConstructeur('sony')">🎮 PlayStation</div>
+</div>
+
+<div id="consoleContainer" style="text-align:center; margin-top:20px; display:none;">
+  <h2>Choisir une console :</h2>
+  <select id="consoleSelect" onchange="filtrerJeux()"></select>
 </div>
 
 <table id="jeuxTable"></table>
@@ -45,34 +73,59 @@
 <script>
 let jeuxData = [];
 
-// Charger les données depuis data/jeux.json
+// Charger JSON
 fetch('data/jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
-
-    // Tri alphabétique par nom
     jeuxData.sort((a,b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity: 'base'}));
-
     afficherJeux(jeuxData, false);
   })
   .catch(err => console.error('Erreur:', err));
 
+// Choix constructeur
+function choisirConstructeur(type) {
+  const select = document.getElementById("consoleSelect");
+  const container = document.getElementById("consoleContainer");
+
+  select.innerHTML = '<option value="all">Toutes les consoles</option>';
+
+  let consoles = [];
+
+  if (type === "nintendo") {
+    consoles = ["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
+  }
+
+  if (type === "sony") {
+    consoles = ["PS1","PS2","PS3","PS4","PS5"];
+  }
+
+  consoles.forEach(c => {
+    const option = document.createElement("option");
+    option.value = c;
+    option.textContent = c;
+    select.appendChild(option);
+  });
+
+  container.style.display = "block";
+
+  // reset affichage
+  afficherJeux(jeuxData, false);
+}
+
+// Affichage tableau
 function afficherJeux(jeux, cacherConsole) {
   const table = document.getElementById('jeuxTable');
   table.innerHTML = '';
 
-  // Entête
   const header = table.insertRow();
   const thNom = document.createElement('th'); thNom.textContent = "Nom du jeu"; header.appendChild(thNom);
   if (!cacherConsole) { const thConsole = document.createElement('th'); thConsole.textContent = "Console"; header.appendChild(thConsole); }
   const thStatut = document.createElement('th'); thStatut.textContent = "Statut"; header.appendChild(thStatut);
 
-  // Lignes
   jeux.forEach(jeu => {
     const row = table.insertRow();
 
-    // Nom + logo
     const nameCell = row.insertCell();
     if (jeu.logo) {
       const logo = document.createElement('img');
@@ -85,18 +138,17 @@ function afficherJeux(jeux, cacherConsole) {
     span.textContent = jeu.nom;
     nameCell.appendChild(span);
 
-    // Console (si visible)
     if (!cacherConsole) {
       const consoleCell = row.insertCell();
       consoleCell.textContent = jeu.console;
     }
 
-    // Statut
     const statutCell = row.insertCell();
     statutCell.textContent = jeu.statut;
   });
 }
 
+// Filtre console
 function filtrerJeux() {
   const valeur = document.getElementById("consoleSelect").value;
   if (valeur === "all") {
