@@ -14,7 +14,7 @@
   tr:nth-child(even) { background-color: #0f2a4c; }
   tr:hover { background-color: #1457a8; transition: 0.3s; cursor: default; }
   td { color: #e0f7ff; vertical-align: middle; }
-  td img.logo { width: 24px; height: 24px; object-fit: contain; margin-right: 8px; vertical-align: middle; }
+  td img.logo { width: 24px !important; height: 24px !important; object-fit: contain; margin-right: 8px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -36,13 +36,14 @@
 <script>
 let jeuxData = [];
 
+// Charger les données depuis data/jeux.json
 fetch('data/jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
 
     // Tri alphabétique par nom
-    jeuxData.sort((a, b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity: 'base'}));
+    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity: 'base'}));
 
     afficherJeux(jeuxData, false);
   })
@@ -62,17 +63,18 @@ function afficherJeux(jeux, cacherConsole) {
   jeux.forEach(jeu => {
     const row = table.insertRow();
 
-// Nom + logo
-const nameCell = row.insertCell();
-if (jeu.logo) {
-  const logo = document.createElement('img');
-  logo.src = jeu.logo;
-  logo.className = "logo";
-  nameCell.appendChild(logo);
-}
-const span = document.createElement('span');
-span.textContent = jeu.nom;
-nameCell.appendChild(span);
+    // Nom + logo
+    const nameCell = row.insertCell();
+    if (jeu.logo) {
+      const logo = document.createElement('img');
+      logo.src = jeu.logo;
+      logo.className = "logo";
+      nameCell.appendChild(logo);
+    }
+
+    const span = document.createElement('span');
+    span.textContent = jeu.nom;
+    nameCell.appendChild(span);
 
     // Console (si visible)
     if (!cacherConsole) {
