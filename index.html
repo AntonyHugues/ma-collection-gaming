@@ -59,23 +59,24 @@ fetch('jeux.json')
   .catch(err => console.error('Erreur:', err));
 
 // Affiche les jeux dans le tableau
-function afficherJeux(jeux) {
+function afficherJeux(jeux, cacherConsole = false) {
   const table = document.getElementById('jeuxTable');
 
   // Supprime toutes les lignes sauf l'entête
-  table.innerHTML = `
-    <tr>
-      <th>Nom du jeu</th>
-      <th>Console</th>
-      <th>Statut</th>
-    </tr>
-  `;
+  table.innerHTML = '';
 
+  // Crée l'entête
+  const header = table.insertRow();
+  header.insertCell(0).outerHTML = "<th>Nom du jeu</th>";
+  if (!cacherConsole) header.insertCell(1).outerHTML = "<th>Console</th>";
+  header.insertCell(cacherConsole ? 1 : 2).outerHTML = "<th>Statut</th>";
+
+  // Ajoute les lignes
   jeux.forEach(jeu => {
     const row = table.insertRow();
     row.insertCell(0).textContent = jeu.nom;
-    row.insertCell(1).textContent = jeu.console;
-    row.insertCell(2).textContent = jeu.statut;
+    if (!cacherConsole) row.insertCell(1).textContent = jeu.console;
+    row.insertCell(cacherConsole ? 1 : 2).textContent = jeu.statut;
   });
 }
 
@@ -83,9 +84,9 @@ function afficherJeux(jeux) {
 function filtrerJeux() {
   const valeur = document.getElementById("consoleSelect").value;
   if (valeur === "all") {
-    afficherJeux(jeuxData);
+    afficherJeux(jeuxData, false);
   } else {
-    afficherJeux(jeuxData.filter(j => j.console === valeur));
+    afficherJeux(jeuxData.filter(j => j.console === valeur), true);
   }
 }
 </script>
