@@ -3,19 +3,19 @@
     "nom": "Zelda: Breath of the Wild",
     "console": "Nintendo Switch",
     "statut": "🛒",
-    "logo": "images/logo-playstation.png"
+    "logo": "images/logo-nintendo-ds.png"
   },
   {
     "nom": "Mario Kart 8",
     "console": "Nintendo Switch",
     "statut": "✅",
-    "logo": "images/logo-ps2.png"
+    "logo": "images/logo-nintendo-switch.png"
   },
   {
     "nom": "GTA V",
     "console": "PS5",
     "statut": "🛒",
-    "logo": "images/logo-ps5.png"
+    "logo": "images/logo-psp.png"
   },
   {
     "nom": "Spider-Man: Miles Morales",
