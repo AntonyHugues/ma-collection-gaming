@@ -62,15 +62,17 @@ function afficherJeux(jeux, cacherConsole) {
   jeux.forEach(jeu => {
     const row = table.insertRow();
 
-    // Nom + logo
-    const nameCell = row.insertCell();
-    const logo = document.createElement('img');
-    logo.src = jeu.logo;
-    logo.className = "logo";
-    const span = document.createElement('span');
-    span.textContent = jeu.nom;
-    nameCell.appendChild(logo);
-    nameCell.appendChild(span);
+// Nom + logo
+const nameCell = row.insertCell();
+if (jeu.logo) {
+  const logo = document.createElement('img');
+  logo.src = jeu.logo;
+  logo.className = "logo";
+  nameCell.appendChild(logo);
+}
+const span = document.createElement('span');
+span.textContent = jeu.nom;
+nameCell.appendChild(span);
 
     // Console (si visible)
     if (!cacherConsole) {
