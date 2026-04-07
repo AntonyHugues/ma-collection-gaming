@@ -65,6 +65,9 @@ fetch('data/jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
+
+    jeuxData.sort((a, b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity: 'base'}));
+
     afficherJeux(jeuxData, false);
   })
   .catch(err => console.error('Erreur:', err));
