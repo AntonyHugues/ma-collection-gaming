@@ -35,7 +35,7 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0, 255, 136, 0.15);
-      transition: transform 0.2s ease‑in‑out, box-shadow 0.2s ease‑in‑out;
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     }
 
     .card:hover {
@@ -51,7 +51,7 @@
 
     .card .title {
       font-size: 18px;
-      font‑weight: bold;
+      font-weight: bold;
       padding: 12px;
       background: #111;
       color: #00ff88;
@@ -76,13 +76,23 @@
     .then(response => response.json())
     .then(jeux => {
       const container = document.getElementById('listeJeux');
+
       jeux.forEach(jeu => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `
-          <img src="${jeu.image}" alt="${jeu.nom}">
-          <div class="title">${jeu.nom}</div>
-        `;
+
+        // Vérifie si jeu est un objet avec une image
+        if (typeof jeu === 'object' && jeu.nom) {
+          const imageHTML = jeu.image ? `<img src="${jeu.image}" alt="${jeu.nom}">` : '';
+          card.innerHTML = `
+            ${imageHTML}
+            <div class="title">${jeu.nom}</div>
+          `;
+        } else {
+          // Cas où jeu est juste une chaîne de caractères
+          card.innerHTML = `<div class="title">${jeu}</div>`;
+        }
+
         container.appendChild(card);
       });
     })
