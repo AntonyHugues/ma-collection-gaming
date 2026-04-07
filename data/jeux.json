@@ -1,6 +1,18 @@
 [
-  "The Legend of Zelda: Breath of the Wild",
-  "Super Mario Odyssey",
-  "Hollow Knight",
-  "Elden Ring"
+  {
+    "nom": "The Legend of Zelda: Breath of the Wild",
+    "image": "https://example.com/zelda.jpg"
+  },
+  {
+    "nom": "Super Mario Odyssey",
+    "image": "https://example.com/mario_odyssey.jpg"
+  },
+  {
+    "nom": "Hollow Knight",
+    "image": "https://example.com/hollow_knight.jpg"
+  },
+  {
+    "nom": "Elden Ring",
+    "image": "https://example.com/elden_ring.jpg"
+  }
 ]
