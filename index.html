@@ -1,81 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ma Collection Gaming</title>
+  <meta charset="UTF-8">
+  <title>🎮 Ma Collection Gaming</title>
   <style>
     body {
+      margin: 0;
+      padding: 0;
       font-family: 'Arial', sans-serif;
-      background: #111;
-      color: white;
+      background: #0e0e0e;
+      color: #fff;
       text-align: center;
-      padding: 20px;
     }
 
-    h1 {
-      margin-bottom: 30px;
+    header {
+      padding: 40px 0;
+      font-size: 32px;
+      font-weight: bold;
+      color: #00ff88;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      max-width: 1000px;
+      gap: 25px;
+      padding: 20px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
     .card {
       background: #1a1a1a;
       border-radius: 12px;
-      padding: 20px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 8px rgba(0, 255, 136, 0.2);
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 255, 136, 0.15);
+      transition: transform 0.2s ease‑in‑out, box-shadow 0.2s ease‑in‑out;
     }
 
     .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 20px rgba(0, 255, 136, 0.5);
+      transform: translateY(-8px);
+      box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
     }
 
     .card img {
       width: 100%;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      height: 250px;
+      object-fit: cover;
     }
 
-    .card h2 {
+    .card .title {
       font-size: 18px;
-      margin: 0;
+      font‑weight: bold;
+      padding: 12px;
+      background: #111;
       color: #00ff88;
+      text-align: center;
+    }
+
+    @media (max-width: 500px) {
+      .card img {
+        height: 180px;
+      }
     }
   </style>
 </head>
 <body>
 
-<h1>🎮 Ma Collection Gaming</h1>
+<header>🎮 Ma Collection de Jeux</header>
 
 <div class="grid" id="listeJeux"></div>
 
 <script>
-  // Charger la liste depuis jeux.json
   fetch('data/jeux.json')
     .then(response => response.json())
     .then(jeux => {
       const container = document.getElementById('listeJeux');
-
       jeux.forEach(jeu => {
         const card = document.createElement('div');
         card.className = 'card';
-
-        // Optionnel : si tu as des images pour chaque jeu, tu peux les mettre ici
-        // card.innerHTML = `<img src="${jeu.image}" alt="${jeu.nom}"><h2>${jeu.nom}</h2>`;
-
-        // Pour l'instant juste le nom
-        card.innerHTML = `<h2>${jeu}</h2>`;
-
+        card.innerHTML = `
+          <img src="${jeu.image}" alt="${jeu.nom}">
+          <div class="title">${jeu.nom}</div>
+        `;
         container.appendChild(card);
       });
     })
-    .catch(err => console.error("Erreur lors du chargement des jeux :", err));
+    .catch(() => {
+      document.getElementById('listeJeux').innerHTML = 
+        "<p>Impossible de charger la liste de jeux.</p>";
+    });
 </script>
 
 </body>
