@@ -2,104 +2,101 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>🎮 Ma Collection Gaming</title>
+  <title>Ma Collection Gaming</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Arial', sans-serif;
-      background: #0e0e0e;
-      color: #fff;
-      text-align: center;
-    }
-
-    header {
-      padding: 40px 0;
-      font-size: 32px;
-      font-weight: bold;
-      color: #00ff88;
-      text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 25px;
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: #1a1a1a;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 255, 136, 0.15);
-      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
-    }
-
-    .card img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-    }
-
-    .card .title {
-      font-size: 18px;
-      font-weight: bold;
-      padding: 12px;
+      font-family: Arial;
       background: #111;
-      color: #00ff88;
-      text-align: center;
+      color: white;
+      padding: 20px;
     }
 
-    @media (max-width: 500px) {
-      .card img {
-        height: 180px;
-      }
+    h1, h2 {
+      color: #00ff88;
+    }
+
+    select, table {
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #00ff88;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #222;
     }
   </style>
 </head>
 <body>
 
-<header>🎮 Ma Collection de Jeux</header>
+<h1>🎮 Ma Collection Gaming</h1>
 
-<div class="grid" id="listeJeux"></div>
+<h2>Filtrer les jeux par console :</h2>
+<select id="consoleSelect" onchange="filtrerJeux()">
+  <option value="all">Toutes les consoles</option>
+  <option value="Nintendo Switch">Nintendo Switch</option>
+  <option value="PS5">PlayStation 5</option>
+  <option value="Xbox Series X">Xbox Series X</option>
+</select>
+
+<table id="jeuxTable">
+  <tr>
+    <th>Nom du jeu</th>
+    <th>Console</th>
+    <th>Statut</th>
+  </tr>
+  <tr>
+    <td>Zelda: Breath of the Wild</td>
+    <td>Nintendo Switch</td>
+    <td>Terminé</td>
+  </tr>
+  <tr>
+    <td>Mario Kart 8</td>
+    <td>Nintendo Switch</td>
+    <td>En cours</td>
+  </tr>
+  <tr>
+    <td>GTA V</td>
+    <td>PS5</td>
+    <td>En cours</td>
+  </tr>
+  <tr>
+    <td>Spider-Man: Miles Morales</td>
+    <td>PS5</td>
+    <td>Pas commencé</td>
+  </tr>
+  <tr>
+    <td>Halo Infinite</td>
+    <td>Xbox Series X</td>
+    <td>En cours</td>
+  </tr>
+</table>
 
 <script>
-  fetch('data/jeux.json')
-    .then(response => response.json())
-    .then(jeux => {
-      const container = document.getElementById('listeJeux');
+function filtrerJeux() {
+  const select = document.getElementById("consoleSelect");
+  const valeur = select.value;
+  const table = document.getElementById("jeuxTable");
+  const rows = table.getElementsByTagName("tr");
 
-      jeux.forEach(jeu => {
-        const card = document.createElement('div');
-        card.className = 'card';
-
-        // Vérifie si jeu est un objet avec une image
-        if (typeof jeu === 'object' && jeu.nom) {
-          const imageHTML = jeu.image ? `<img src="${jeu.image}" alt="${jeu.nom}">` : '';
-          card.innerHTML = `
-            ${imageHTML}
-            <div class="title">${jeu.nom}</div>
-          `;
-        } else {
-          // Cas où jeu est juste une chaîne de caractères
-          card.innerHTML = `<div class="title">${jeu}</div>`;
-        }
-
-        container.appendChild(card);
-      });
-    })
-    .catch(() => {
-      document.getElementById('listeJeux').innerHTML = 
-        "<p>Impossible de charger la liste de jeux.</p>";
-    });
+  for (let i = 1; i < rows.length; i++) { // i=1 pour sauter l'entête
+    const consoleCell = rows[i].getElementsByTagName("td")[1].textContent;
+    if (valeur === "all" || consoleCell === valeur) {
+      rows[i].style.display = "";
+    } else {
+      rows[i].style.display = "none";
+    }
+  }
+}
 </script>
 
 </body>
