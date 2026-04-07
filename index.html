@@ -1,17 +1,78 @@
-<h1>🎮 Ma Collection</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ma Collection Gaming</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
 
-<ul id="listeJeux"></ul>
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(0, 255, 136, 0.2);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 255, 136, 0.5);
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin: 0;
+      color: #00ff88;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎮 Ma Collection Gaming</h1>
+
+<div class="grid" id="listeJeux"></div>
 
 <script>
-  // Charger la liste de jeux depuis le fichier JSON
-  fetch('data/jeux.json')  // adapte le chemin si nécessaire
+  // Charger la liste depuis jeux.json
+  fetch('data/jeux.json')
     .then(response => response.json())
     .then(jeux => {
-      const liste = document.getElementById('listeJeux');
+      const container = document.getElementById('listeJeux');
+
       jeux.forEach(jeu => {
-        let li = document.createElement('li');
-        li.textContent = jeu;
-        liste.appendChild(li);
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // Optionnel : si tu as des images pour chaque jeu, tu peux les mettre ici
+        // card.innerHTML = `<img src="${jeu.image}" alt="${jeu.nom}"><h2>${jeu.nom}</h2>`;
+
+        // Pour l'instant juste le nom
+        card.innerHTML = `<h2>${jeu}</h2>`;
+
+        container.appendChild(card);
       });
     })
     .catch(err => console.error("Erreur lors du chargement des jeux :", err));
