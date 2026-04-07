@@ -3,24 +3,24 @@
     "nom": "Zelda: Breath of the Wild",
     "console": "Nintendo Switch",
     "statut": "Terminé",
-    "logo": ""
+    "logo": "images/nintendo-switch/logo-nintendo-switch.png"
   },
   {
     "nom": "Mario Kart 8",
     "console": "Nintendo Switch",
     "statut": "En cours",
-    "logo": ""
+    "logo": "images/nintendo-switch/logo-nintendo-switch.png"
   },
   {
     "nom": "GTA V",
     "console": "PS5",
     "statut": "En cours",
-    "logo": ""
+    "logo": "images/ps5/logo-ps5.png"
   },
   {
     "nom": "Spider-Man: Miles Morales",
     "console": "PS5",
     "statut": "Pas commencé",
-    "logo": ""
+    "logo": "images/ps5/logo-ps5.png"
   }
 ]
