@@ -4,13 +4,22 @@
 <meta charset="UTF-8">
 <title>Ma Collection Gaming</title>
 <style>
-  body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
-  h1, h2 { color: #00cfff; text-align: center; }
-
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0b1e3b;
+    color: #e0f7ff;
+    padding: 20px;
+  }
+  h1 { text-align:center; color:#00cfff; }
+  
   /* Cartes constructeur */
+  .card-container {
+    text-align:center;
+    margin-bottom:20px;
+  }
   .card {
     display: inline-block;
-    padding: 20px;
+    padding: 20px 30px;
     margin: 10px;
     background: #12325b;
     color: #00cfff;
@@ -18,147 +27,145 @@
     cursor: pointer;
     font-size: 18px;
     transition: 0.3s;
-  }
-
-  .card:hover {
-    background: #1457a8;
-    transform: scale(1.05);
-  }
-
-  select {
-    padding: 10px 15px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    background: #12325b;
-    color: #e0f7ff;
-    margin-bottom: 20px;
-    cursor: pointer;
-  }
-
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 0 10px #00cfff66; }
-  th, td { padding: 12px; text-align: left; }
-  th { background-color: #12325b; color: #00cfff; }
-  tr:nth-child(even) { background-color: #0f2a4c; }
-  tr:hover { background-color: #1457a8; transition: 0.3s; }
-  td { color: #e0f7ff; vertical-align: middle; }
-
-  td img.logo {
-    width: 24px !important;
-    height: 24px !important;
-    object-fit: contain;
-    margin-right: 8px;
     vertical-align: middle;
   }
+  .card img {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  .card:hover { background:#1457a8; transform:scale(1.05); }
+  .card.active { background:#00cfff; color:#0b1e3b; transform:scale(1.08); }
+
+  /* Tableau transformé en cartes */
+  #jeuxTable {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+    margin-top:20px;
+  }
+  .jeu-card {
+    background:#12325b;
+    border-radius:15px;
+    padding:15px;
+    width:200px;
+    text-align:center;
+    box-shadow:0 0 10px #00cfff66;
+    transition:0.3s;
+  }
+  .jeu-card:hover { background:#1457a8; transform:scale(1.05); }
+  .jeu-card img { width:64px; height:64px; object-fit:contain; margin-bottom:10px; }
+  .jeu-card h3 { margin:5px 0; color:#00cfff; font-size:16px; }
+  .jeu-card p { margin:3px 0; font-size:14px; }
 </style>
 </head>
 <body>
 
 <h1>🎮 Ma Collection Gaming</h1>
+<h2 style="text-align:center;">Choisir un constructeur :</h2>
 
-<h2>Choisir un constructeur :</h2>
-
-<div style="text-align:center;">
-  <div class="card" onclick="choisirConstructeur('nintendo')">🎮 Nintendo</div>
-  <div class="card" onclick="choisirConstructeur('sony')">🎮 PlayStation</div>
+<div class="card-container">
+  <div class="card" id="card-nintendo" onclick="choisirConstructeur('nintendo')">
+    <img src="images/logos/nintendo.png" alt="Nintendo Logo">Nintendo
+  </div>
+  <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">
+    <img src="images/logos/sony.png" alt="Sony Logo">PlayStation
+  </div>
 </div>
 
-<div id="consoleContainer" style="text-align:center; margin-top:20px; display:none;">
-  <h2>Choisir une console :</h2>
+<div id="consoleContainer" style="text-align:center; margin-bottom:20px; display:none;">
   <select id="consoleSelect" onchange="filtrerJeux()"></select>
 </div>
 
-<table id="jeuxTable"></table>
+<div id="jeuxTable"></div>
 
 <script>
 let jeuxData = [];
 
 // Charger JSON
 fetch('data/jeux.json')
-  .then(response => response.json())
+  .then(res => res.json())
   .then(data => {
     jeuxData = data;
-    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity: 'base'}));
+    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom,'fr',{sensitivity:'base'}));
     afficherJeux(jeuxData, false);
   })
-  .catch(err => console.error('Erreur:', err));
+  .catch(err=>console.error('Erreur:',err));
 
 // Choix constructeur
-function choisirConstructeur(type) {
+function choisirConstructeur(type){
   const select = document.getElementById("consoleSelect");
   const container = document.getElementById("consoleContainer");
 
-  select.innerHTML = '<option value="all">Toutes les consoles</option>';
+  // reset carte active
+  document.getElementById("card-nintendo").classList.remove("active");
+  document.getElementById("card-sony").classList.remove("active");
+  document.getElementById("card-"+type).classList.add("active");
 
+  select.innerHTML = '';
   let consoles = [];
+  if(type==='nintendo') consoles=["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
+  if(type==='sony') consoles=["PS1","PS2","PS3","PS4","PS5"];
 
-  if (type === "nintendo") {
-    consoles = ["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
-  }
-
-  if (type === "sony") {
-    consoles = ["PS1","PS2","PS3","PS4","PS5"];
-  }
-
-  consoles.forEach(c => {
+  // remplir select
+  consoles.forEach(c=>{
     const option = document.createElement("option");
-    option.value = c;
-    option.textContent = c;
+    option.value=c;
+    option.textContent=c;
     select.appendChild(option);
   });
 
   container.style.display = "block";
 
-  // reset affichage
-  afficherJeux(jeuxData, false);
+  // afficher tous les jeux du constructeur
+  const filtered = jeuxData.filter(j=>consoles.includes(j.console));
+  afficherJeux(filtered,true);
 }
 
-// Affichage tableau
-function afficherJeux(jeux, cacherConsole) {
+// Affichage cartes de jeux
+function afficherJeux(jeux,cacherConsole){
   const table = document.getElementById('jeuxTable');
-  table.innerHTML = '';
+  table.innerHTML='';
 
-  const header = table.insertRow();
-  const thNom = document.createElement('th'); thNom.textContent = "Nom du jeu"; header.appendChild(thNom);
-  if (!cacherConsole) { const thConsole = document.createElement('th'); thConsole.textContent = "Console"; header.appendChild(thConsole); }
-  const thStatut = document.createElement('th'); thStatut.textContent = "Statut"; header.appendChild(thStatut);
+  jeux.forEach(jeu=>{
+    const card = document.createElement('div');
+    card.className='jeu-card';
 
-  jeux.forEach(jeu => {
-    const row = table.insertRow();
-
-    const nameCell = row.insertCell();
-    if (jeu.logo) {
-      const logo = document.createElement('img');
-      logo.src = jeu.logo;
-      logo.className = "logo";
-      nameCell.appendChild(logo);
+    if(jeu.logo){
+      const img = document.createElement('img');
+      img.src=jeu.logo;
+      card.appendChild(img);
     }
 
-    const span = document.createElement('span');
-    span.textContent = jeu.nom;
-    nameCell.appendChild(span);
+    const title = document.createElement('h3');
+    title.textContent=jeu.nom;
+    card.appendChild(title);
 
-    if (!cacherConsole) {
-      const consoleCell = row.insertCell();
-      consoleCell.textContent = jeu.console;
+    if(!cacherConsole){
+      const cons = document.createElement('p');
+      cons.textContent=jeu.console;
+      card.appendChild(cons);
     }
 
-    const statutCell = row.insertCell();
-    statutCell.textContent = jeu.statut;
+    const status = document.createElement('p');
+    status.textContent=jeu.statut;
+    card.appendChild(status);
+
+    table.appendChild(card);
   });
 }
 
-// Filtre console
-function filtrerJeux() {
+// Filtrer par console
+function filtrerJeux(){
   const valeur = document.getElementById("consoleSelect").value;
-  if (valeur === "all") {
-    afficherJeux(jeuxData, false);
-  } else {
-    const filtered = jeuxData.filter(j => j.console === valeur);
-    afficherJeux(filtered, true);
+  if(valeur==="all") afficherJeux(jeuxData,false);
+  else{
+    const filtered = jeuxData.filter(j=>j.console===valeur);
+    afficherJeux(filtered,true);
   }
 }
 </script>
-
 </body>
 </html>
