@@ -14,13 +14,13 @@
   {
     "nom": "GTA V",
     "console": "PS5",
-    "statut": "En cours",
+    "statut": "🛒",
     "logo": "images/ps5/logo-ps5.png"
   },
   {
     "nom": "Spider-Man: Miles Morales",
     "console": "PS5",
-    "statut": "Pas commencé",
+    "statut": "✅",
     "logo": "images/ps5/logo-ps5.png"
   }
 ]
