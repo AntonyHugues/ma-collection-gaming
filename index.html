@@ -6,61 +6,22 @@
 <style>
   body {
     font-family: 'Segoe UI', sans-serif;
-    background: #0b1e3b; /* bleu foncé */
-    color: #e0f7ff; /* texte clair */
+    background: #0b1e3b;
+    color: #e0f7ff;
     padding: 20px;
   }
-
-  h1, h2 {
-    color: #00cfff;
-    text-align: center;
-  }
-
+  h1, h2 { color: #00cfff; text-align: center; }
   select {
-    padding: 10px 15px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    background: #12325b;
-    color: #e0f7ff;
-    margin-bottom: 20px;
-    cursor: pointer;
+    padding: 10px 15px; font-size: 16px; border-radius: 8px; border: none;
+    background: #12325b; color: #e0f7ff; margin-bottom: 20px; cursor: pointer;
   }
-
-  select:hover {
-    background: #1457a8;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    box-shadow: 0 0 10px #00cfff66;
-  }
-
-  th, td {
-    padding: 12px;
-    text-align: left;
-  }
-
-  th {
-    background-color: #12325b;
-    color: #00cfff;
-  }
-
-  tr:nth-child(even) {
-    background-color: #0f2a4c;
-  }
-
-  tr:hover {
-    background-color: #1457a8;
-    transition: 0.3s;
-    cursor: default;
-  }
-
-  td {
-    color: #e0f7ff;
-  }
+  select:hover { background: #1457a8; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 0 10px #00cfff66; }
+  th, td { padding: 12px; text-align: left; }
+  th { background-color: #12325b; color: #00cfff; }
+  tr:nth-child(even) { background-color: #0f2a4c; }
+  tr:hover { background-color: #1457a8; transition: 0.3s; cursor: default; }
+  td { color: #e0f7ff; }
 </style>
 </head>
 <body>
@@ -83,47 +44,48 @@
     <th>Console</th>
     <th>Statut</th>
   </tr>
-  <tr>
-    <td>Zelda: Breath of the Wild</td>
-    <td>Nintendo Switch</td>
-    <td>Terminé</td>
-  </tr>
-  <tr>
-    <td>Mario Kart 8</td>
-    <td>Nintendo Switch</td>
-    <td>En cours</td>
-  </tr>
-  <tr>
-    <td>GTA V</td>
-    <td>PS5</td>
-    <td>En cours</td>
-  </tr>
-  <tr>
-    <td>Spider-Man: Miles Morales</td>
-    <td>PS5</td>
-    <td>Pas commencé</td>
-  </tr>
-  <tr>
-    <td>Halo Infinite</td>
-    <td>Xbox Series X</td>
-    <td>En cours</td>
-  </tr>
 </table>
 
 <script>
-function filtrerJeux() {
-  const select = document.getElementById("consoleSelect");
-  const valeur = select.value;
-  const table = document.getElementById("jeuxTable");
-  const rows = table.getElementsByTagName("tr");
+// Charger les données depuis jeux.json
+let jeuxData = [];
 
-  for (let i = 1; i < rows.length; i++) { // i=1 pour sauter l'entête
-    const consoleCell = rows[i].getElementsByTagName("td")[1].textContent;
-    if (valeur === "all" || consoleCell === valeur) {
-      rows[i].style.display = "";
-    } else {
-      rows[i].style.display = "none";
-    }
+fetch('jeux.json')
+  .then(response => response.json())
+  .then(data => {
+    jeuxData = data;
+    afficherJeux(jeuxData);
+  })
+  .catch(err => console.error('Erreur:', err));
+
+// Affiche les jeux dans le tableau
+function afficherJeux(jeux) {
+  const table = document.getElementById('jeuxTable');
+
+  // Supprime toutes les lignes sauf l'entête
+  table.innerHTML = `
+    <tr>
+      <th>Nom du jeu</th>
+      <th>Console</th>
+      <th>Statut</th>
+    </tr>
+  `;
+
+  jeux.forEach(jeu => {
+    const row = table.insertRow();
+    row.insertCell(0).textContent = jeu.nom;
+    row.insertCell(1).textContent = jeu.console;
+    row.insertCell(2).textContent = jeu.statut;
+  });
+}
+
+// Filtrer les jeux par console
+function filtrerJeux() {
+  const valeur = document.getElementById("consoleSelect").value;
+  if (valeur === "all") {
+    afficherJeux(jeuxData);
+  } else {
+    afficherJeux(jeuxData.filter(j => j.console === valeur));
   }
 }
 </script>
