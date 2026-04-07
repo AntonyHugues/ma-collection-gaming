@@ -62,7 +62,7 @@
 // Charger les données depuis jeux.json
 let jeuxData = [];
 
-fetch('jeux.json')
+fetch('data/jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
