@@ -47,5 +47,26 @@
     "statut": "A_acheter",
     "icone": "🛒",
     "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Final Fantasy VII",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Final Fantasy VIII",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Final Fantasy IX",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
   }
 ]
