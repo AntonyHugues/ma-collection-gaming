@@ -49,6 +49,13 @@
     "logo": "images/logo-playstation.png"
   },
   {
+    "nom": "Final Fantasy VI",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
     "nom": "Final Fantasy VII",
     "console": "PS1",
     "statut": "Collection",
