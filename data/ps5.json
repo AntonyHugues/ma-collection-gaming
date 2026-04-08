@@ -1,1 +1,16 @@
-
+[
+  {
+    "nom": "GTA V",
+    "console": "PS5",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-nintendo-ds.png"
+  },
+  {
+    "nom": "Spider-Man: Miles Morales",
+    "console": "PS5",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-nintendo-ds.png"
+  }
+]
