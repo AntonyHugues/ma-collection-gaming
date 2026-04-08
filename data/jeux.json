@@ -3,28 +3,28 @@
     "nom": "Zelda: Breath of the Wild",
     "console": "Nintendo Switch",
     "statut": "A_acheter",
-    "icone": "🛒"
-    "logo": "images/logo-nintendo-ds.png"
+    "icone": "🛒",
+    "logo": "images/logo-nintendo-ds.pn"
   },
   {
     "nom": "Mario Kart 8",
     "console": "Nintendo Switch",
     "statut": "Collection",
-    "icone": "🎮"
-    "logo": "images/logo-nintendo-switch.png"
+    "icone": "🎮",
+    "logo": "images/logo-nintendo-ds.pn"
   },
   {
     "nom": "GTA V",
     "console": "PS5",
     "statut": "A_acheter",
-    "icone": "🛒"
-    "logo": "images/logo-psp.png"
+    "icone": "🛒",
+    "logo": "images/logo-nintendo-ds.pn"
   },
   {
     "nom": "Spider-Man: Miles Morales",
     "console": "PS5",
     "statut": "Collection",
-    "icone": "🎮"
-    "logo": "images/logo-ps5.png"
+    "icone": "🎮",
+    "logo": "images/logo-nintendo-ds.pn"
   }
 ]
