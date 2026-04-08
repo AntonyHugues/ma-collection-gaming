@@ -2,16 +2,16 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Ma Collection Gaming</title>
+<title>Ma Collection Gaming Pro</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
-h1,h2{ color:#00cfff; text-align:center;}
+h1,h2{ color:#00cfff; text-align:center; margin-bottom:10px;}
 .card{ display:inline-block; padding:20px; margin:10px; background:#12325b; color:#00cfff; border-radius:15px; cursor:pointer; transition:0.3s;}
 .card:hover{ background:#1457a8; transform:scale(1.05);}
 .card.active{ background:#00cfff; color:#0b1e3b;}
-select,input{ padding:10px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff;}
+select,input{ padding:8px 12px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff;}
 input:focus{outline:none; box-shadow:0 0 8px #00cfff;}
-button{margin:5px;padding:8px 12px;background:#12325b;color:#00cfff;border:none;border-radius:8px;cursor:pointer;}
+button{margin:0 5px;padding:6px 12px;background:#12325b;color:#00cfff;border:none;border-radius:8px;cursor:pointer;}
 button:hover{background:#1457a8;}
 button.active{background:#00cfff;color:#0b1e3b;}
 table{ width:100%; border-collapse:collapse; margin-top:10px; box-shadow:0 0 10px #00cfff66;}
@@ -20,12 +20,20 @@ th{ background:#12325b; color:#00cfff;}
 tr:nth-child(even){ background:#0f2a4c;}
 tr:hover{ background:#1457a8;}
 td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; object-fit:contain;}
+td span.statutIcon{ cursor:pointer; font-size:18px; }
+#compteur{display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff;}
+#statusSearchContainer{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+@media(max-width:768px){
+  #statusSearchContainer{flex-direction:column; align-items:flex-start;}
+  #statusSearchContainer div{margin:5px 0;}
+}
 </style>
 </head>
 <body>
 
-<h1>🎮 Ma Collection Gaming</h1>
+<h1>🎮 Ma Collection Gaming Pro</h1>
 
+<h2>Constructeur</h2>
 <div style="text-align:center;">
   <div class="card" id="card-nintendo" onclick="choisirConstructeur('nintendo')">Nintendo</div>
   <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">PlayStation</div>
@@ -35,66 +43,69 @@ td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; o
   <select id="consoleSelect" onchange="appliquerFiltres()"></select>
 </div>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+<div id="statusSearchContainer">
   <div>
     <button onclick="filtrerStatut(event,'all')" class="active">Tous</button>
     <button onclick="filtrerStatut(event,'Collection')">🎮 Collection</button>
     <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
   </div>
-
   <div>
     <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
   </div>
 </div>
 
 <table id="jeuxTable"></table>
-
-<div id="compteur" style="display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff;"></div>
+<div id="compteur"></div>
 
 <script>
 let jeuxData = [];
 let consolesActuelles = [];
 let statutActuel = "all";
 
-// Charger JSON
-fetch('data/jeux.json')
-.then(r => r.json())
-.then(data => {
-  jeuxData = data;
-  jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
-  afficherJeux(jeuxData,false);
-  document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
-});
+// JSON par console
+const jsonParConstructeur = {
+  "nintendo": ["data/switch.json","data/nes.json","data/ps1.json"],  // mets tes fichiers Nintendo ici
+  "sony": ["data/ps1.json","data/ps2.json","data/ps3.json","data/ps4.json","data/ps5.json"] // fichiers PlayStation
+};
 
-// Constructeur
 function choisirConstructeur(type){
   document.getElementById("card-nintendo").classList.remove("active");
   document.getElementById("card-sony").classList.remove("active");
   document.getElementById("card-"+type).classList.add("active");
 
-  const select = document.getElementById("consoleSelect");
-  select.innerHTML = '<option value="all">Toutes les consoles</option>';
+  // Chargement des fichiers JSON correspondant
+  const fichiers = jsonParConstructeur[type];
+  jeuxData = [];
+  let promesses = fichiers.map(f => fetch(f).then(r=>r.json()));
 
-  if(type==="nintendo") consolesActuelles=["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
-  if(type==="sony") consolesActuelles=["PS1","PS2","PS3","PS4","PS5"];
+  Promise.all(promesses).then(results => {
+    results.forEach(arr => { jeuxData.push(...arr); });
 
-  consolesActuelles.forEach(c=>{
-    const opt=document.createElement("option");
-    opt.value=c;
-    opt.textContent=c;
-    select.appendChild(opt);
+    // Tri alphabétique
+    jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+
+    // Remplir le select avec les consoles présentes
+    const select = document.getElementById("consoleSelect");
+    select.innerHTML = '<option value="all">Toutes les consoles</option>';
+    const consoles = [...new Set(jeuxData.map(j=>j.console))];
+    consolesActuelles = consoles;
+    consoles.forEach(c=>{
+      const opt=document.createElement("option");
+      opt.value=c;
+      opt.textContent=c;
+      select.appendChild(opt);
+    });
+
+    document.getElementById("consoleContainer").style.display="block";
+    document.getElementById("searchInput").value="";
+    statutActuel="all";
+    document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+    document.querySelector("button[onclick*='all']").classList.add("active");
+    appliquerFiltres();
   });
-
-  document.getElementById("consoleContainer").style.display="block";
-  document.getElementById("searchInput").value="";
-  statutActuel="all";
-  document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-  document.querySelector("button[onclick*='all']").classList.add("active");
-
-  appliquerFiltres();
 }
 
-// Statut
+// Filtrer par statut
 function filtrerStatut(event,statut){
   statutActuel=statut;
   document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
@@ -102,34 +113,29 @@ function filtrerStatut(event,statut){
   appliquerFiltres();
 }
 
-// Filtres
+// Appliquer tous les filtres
 function appliquerFiltres(){
   let result = jeuxData;
   const search = document.getElementById("searchInput").value.toLowerCase();
   const select = document.getElementById("consoleSelect");
 
-  // filtre constructeur
-  if(consolesActuelles.length>0) result=result.filter(j=>consolesActuelles.includes(j.console));
-  // filtre console
   if(select && select.value !== "all") result=result.filter(j=>j.console===select.value);
-  // recherche
   if(search) result=result.filter(j=>j.nom.toLowerCase().includes(search));
-  // filtre statut
   if(statutActuel !== "all") result=result.filter(j=>j.statut === statutActuel);
 
-  afficherJeux(result,consolesActuelles.length>0);
+  afficherJeux(result,true);
   document.getElementById("compteur").textContent = result.length + " jeu(x)";
 }
 
-// Tableau
-function afficherJeux(jeux,cacherConsole){
+// Afficher le tableau
+function afficherJeux(jeux){
   const table=document.getElementById("jeuxTable");
   table.innerHTML="";
 
   const header=table.insertRow();
-  header.innerHTML="<th>Nom</th>"+(!cacherConsole?"<th>Console</th>":"")+"<th>Statut</th>";
+  header.innerHTML="<th>Nom</th><th>Console</th><th>Statut</th>";
 
-  jeux.forEach(j=>{
+  jeux.forEach((j,index)=>{
     const row=table.insertRow();
 
     const nom=row.insertCell();
@@ -141,13 +147,29 @@ function afficherJeux(jeux,cacherConsole){
     }
     nom.appendChild(document.createTextNode(j.nom));
 
-    if(!cacherConsole) row.insertCell().textContent=j.console;
+    row.insertCell().textContent=j.console;
 
     const statut=row.insertCell();
-    statut.textContent = j.icone; // icône affichée
-    statut.title = j.statut;     // texte pour tooltip
-    statut.style.fontWeight="bold";
+    const icon=document.createElement("span");
+    icon.textContent=j.icone;
+    icon.title=j.statut;
+    icon.className="statutIcon";
+    icon.onclick=()=>changerStatut(index);
+    statut.appendChild(icon);
   });
+}
+
+// Changer le statut en cliquant sur l’icône
+function changerStatut(index){
+  let jeu = jeuxData[index];
+  if(jeu.statut==="A_acheter"){
+    jeu.statut="Collection";
+    jeu.icone="🎮";
+  } else {
+    jeu.statut="A_acheter";
+    jeu.icone="🛒";
+  }
+  appliquerFiltres();
 }
 </script>
 </body>
