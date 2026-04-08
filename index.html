@@ -62,47 +62,56 @@ let jeuxData = [];
 let consolesActuelles = [];
 let statutActuel = "all";
 
-// JSON par constructeur
-const jsonParConstructeur = {
-  "nintendo": ["data/switch.json"], // ajoute d'autres fichiers si besoin
-  "sony": ["data/ps5.json"] // ajoute d'autres fichiers si besoin
-};
+// Charger tous les jeux dès le départ
+fetch('data/index.json')
+  .then(r=>r.json())
+  .then(fichiers=>{
+    const chemins = fichiers.map(f => 'data/' + f);
+    return Promise.all(chemins.map(f => fetch(f).then(r=>r.json())));
+  })
+  .then(results=>{
+    results.forEach(arr => jeuxData.push(...arr));
+    jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+    afficherJeux(jeuxData);
+    document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
+  })
+  .catch(err=>console.error(err));
 
+// Choisir constructeur (charge uniquement les consoles de ce constructeur)
 function choisirConstructeur(type){
   document.getElementById("card-nintendo").classList.remove("active");
   document.getElementById("card-sony").classList.remove("active");
   document.getElementById("card-"+type).classList.add("active");
 
-  const fichiers = jsonParConstructeur[type];
-  jeuxData = [];
+  fetch(`data/${type}.json`)
+    .then(r=>r.json())
+    .then(listeJson=>{
+      const chemins = listeJson.map(f=>'data/'+f);
+      return Promise.all(chemins.map(f=>fetch(f).then(r=>r.json())));
+    })
+    .then(results=>{
+      let filtered = [];
+      results.forEach(arr => filtered.push(...arr));
+      filtered.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
 
-  Promise.all(fichiers.map(f => fetch(f).then(r=>r.json())))
-    .then(results => {
-      results.forEach(arr => jeuxData.push(...arr));
-
-      // Tri alphabétique
-      jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
-
-      // Remplir le select avec les consoles présentes
+      // Remplir le select
       const select = document.getElementById("consoleSelect");
-      select.innerHTML = '<option value="all">Toutes les consoles</option>';
-      const consoles = [...new Set(jeuxData.map(j=>j.console))];
+      select.innerHTML='<option value="all">Toutes les consoles</option>';
+      const consoles = [...new Set(filtered.map(j=>j.console))];
       consolesActuelles = consoles;
       consoles.forEach(c=>{
         const opt=document.createElement("option");
-        opt.value=c;
-        opt.textContent=c;
+        opt.value=c; opt.textContent=c;
         select.appendChild(opt);
       });
-
       document.getElementById("consoleContainer").style.display="block";
       document.getElementById("searchInput").value="";
       statutActuel="all";
       document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
       document.querySelector("button[onclick*='all']").classList.add("active");
-      appliquerFiltres();
+      afficherJeux(filtered);
     })
-    .catch(err => console.error(err));
+    .catch(err=>console.error(err));
 }
 
 // Filtrer par statut
