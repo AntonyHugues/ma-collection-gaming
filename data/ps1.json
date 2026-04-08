@@ -145,16 +145,37 @@
     "statut": "A_acheter",
     "icone": "🛒",
     "logo": "images/logo-playstation.png"
-  }
+  },
   {
     "nom": "Metal Gear Solid",
     "console": "PS1",
     "statut": "Collection",
     "icone": "🎮",
     "logo": "images/logo-playstation.png"
-  }
+  },
   {
     "nom": "Metal Gear Solid: Special Missions",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Spyro the Dragon",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Spyro 2: Gateway to Glimmer",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Spyro: Year of the Dragon",
     "console": "PS1",
     "statut": "A_acheter",
     "icone": "🛒",
