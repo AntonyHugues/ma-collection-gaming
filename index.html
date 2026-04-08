@@ -36,7 +36,7 @@ td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; o
   <select id="consoleSelect" onchange="appliquerFiltres()"></select>
 </div>
 
-<div style="text-align:center; margin-top:20px;">
+<div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
   <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
 </div>
 
@@ -46,9 +46,9 @@ td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; o
   <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
 </div>
 
-<div id="compteur" style="text-align:center; margin-top:10px;"></div>
-
 <table id="jeuxTable"></table>
+
+<div id="compteur" style="display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff;"></div>
 
 <script>
 let jeuxData = [];
