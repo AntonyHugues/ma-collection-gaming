@@ -2,16 +2,16 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Ma Collection Gaming Interactive</title>
+<title>Ma Collection Gaming</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
-h1,h2{ color:#00cfff; text-align:center; margin-bottom:10px;}
+h1,h2{ color:#00cfff; text-align:center;}
 .card{ display:inline-block; padding:20px; margin:10px; background:#12325b; color:#00cfff; border-radius:15px; cursor:pointer; transition:0.3s;}
 .card:hover{ background:#1457a8; transform:scale(1.05);}
 .card.active{ background:#00cfff; color:#0b1e3b;}
-select,input{ padding:8px 12px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff;}
+select,input{ padding:10px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff;}
 input:focus{outline:none; box-shadow:0 0 8px #00cfff;}
-button{margin:0 5px;padding:6px 12px;background:#12325b;color:#00cfff;border:none;border-radius:8px;cursor:pointer;}
+button{margin:5px;padding:8px 12px;background:#12325b;color:#00cfff;border:none;border-radius:8px;cursor:pointer;}
 button:hover{background:#1457a8;}
 button.active{background:#00cfff;color:#0b1e3b;}
 table{ width:100%; border-collapse:collapse; margin-top:10px; box-shadow:0 0 10px #00cfff66;}
@@ -20,17 +20,11 @@ th{ background:#12325b; color:#00cfff;}
 tr:nth-child(even){ background:#0f2a4c;}
 tr:hover{ background:#1457a8;}
 td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; object-fit:contain;}
-td img.statutIcon{ width:24px; height:24px; cursor:pointer; }
-#compteur{display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff;}
-@media(max-width:768px){
-  #statusSearchContainer{flex-direction:column; align-items:flex-start;}
-  #statusSearchContainer div{margin:5px 0;}
-}
 </style>
 </head>
 <body>
 
-<h1>🎮 Ma Collection Gaming Interactive</h1>
+<h1>🎮 Ma Collection Gaming</h1>
 
 <h2>Constructeur</h2>
 <div style="text-align:center;">
@@ -42,21 +36,19 @@ td img.statutIcon{ width:24px; height:24px; cursor:pointer; }
   <select id="consoleSelect" onchange="appliquerFiltres()"></select>
 </div>
 
-<!-- Ligne boutons + recherche -->
-<div id="statusSearchContainer" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-  <div>
-    <button onclick="filtrerStatut(event,'all')" class="active">Tous</button>
-    <button onclick="filtrerStatut(event,'Collection')">🎮 Collection</button>
-    <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
-  </div>
-  <div>
-    <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
-  </div>
+<div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+  <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
+</div>
+
+<div style="text-align:center; margin-top:10px;">
+  <button onclick="filtrerStatut(event,'all')" class="active">Tous</button>
+  <button onclick="filtrerStatut(event,'Collection')">🎮 Collection</button>
+  <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
 </div>
 
 <table id="jeuxTable"></table>
 
-<div id="compteur"></div>
+<div id="compteur" style="display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff;"></div>
 
 <script>
 let jeuxData = [];
@@ -115,9 +107,13 @@ function appliquerFiltres(){
   const search = document.getElementById("searchInput").value.toLowerCase();
   const select = document.getElementById("consoleSelect");
 
+  // filtre constructeur
   if(consolesActuelles.length>0) result=result.filter(j=>consolesActuelles.includes(j.console));
+  // filtre console
   if(select && select.value !== "all") result=result.filter(j=>j.console===select.value);
+  // recherche
   if(search) result=result.filter(j=>j.nom.toLowerCase().includes(search));
+  // filtre statut
   if(statutActuel !== "all") result=result.filter(j=>j.statut === statutActuel);
 
   afficherJeux(result,consolesActuelles.length>0);
@@ -132,7 +128,7 @@ function afficherJeux(jeux,cacherConsole){
   const header=table.insertRow();
   header.innerHTML="<th>Nom</th>"+(!cacherConsole?"<th>Console</th>":"")+"<th>Statut</th>";
 
-  jeux.forEach((j,index)=>{
+  jeux.forEach(j=>{
     const row=table.insertRow();
 
     const nom=row.insertCell();
@@ -147,27 +143,10 @@ function afficherJeux(jeux,cacherConsole){
     if(!cacherConsole) row.insertCell().textContent=j.console;
 
     const statut=row.insertCell();
-    const icon=document.createElement("span");
-    icon.textContent=j.icone;
-    icon.title=j.statut;
-    icon.style.cursor="pointer";
-    icon.style.fontSize="18px";
-    icon.onclick=()=>changerStatut(index);
-    statut.appendChild(icon);
+    statut.textContent = j.icone; // icône affichée
+    statut.title = j.statut;     // texte pour tooltip
+    statut.style.fontWeight="bold";
   });
-}
-
-// Changer le statut en cliquant sur l'icône
-function changerStatut(index){
-  let jeu = jeuxData[index];
-  if(jeu.statut==="A_acheter"){
-    jeu.statut="Collection";
-    jeu.icone="🎮";
-  } else {
-    jeu.statut="A_acheter";
-    jeu.icone="🛒";
-  }
-  appliquerFiltres(); // rafraîchir tableau et compteur
 }
 </script>
 </body>
