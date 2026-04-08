@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Ma Collection Gaming</title>
+<title>Ma Collection Gaming Interactive</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
 h1,h2{ color:#00cfff; text-align:center; margin-bottom:10px;}
@@ -20,6 +20,7 @@ th{ background:#12325b; color:#00cfff;}
 tr:nth-child(even){ background:#0f2a4c;}
 tr:hover{ background:#1457a8;}
 td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; object-fit:contain;}
+td img.statutIcon{ width:24px; height:24px; cursor:pointer; }
 #compteur{display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff;}
 @media(max-width:768px){
   #statusSearchContainer{flex-direction:column; align-items:flex-start;}
@@ -29,7 +30,7 @@ td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; o
 </head>
 <body>
 
-<h1>🎮 Ma Collection Gaming</h1>
+<h1>🎮 Ma Collection Gaming Interactive</h1>
 
 <h2>Constructeur</h2>
 <div style="text-align:center;">
@@ -131,7 +132,7 @@ function afficherJeux(jeux,cacherConsole){
   const header=table.insertRow();
   header.innerHTML="<th>Nom</th>"+(!cacherConsole?"<th>Console</th>":"")+"<th>Statut</th>";
 
-  jeux.forEach(j=>{
+  jeux.forEach((j,index)=>{
     const row=table.insertRow();
 
     const nom=row.insertCell();
@@ -146,10 +147,27 @@ function afficherJeux(jeux,cacherConsole){
     if(!cacherConsole) row.insertCell().textContent=j.console;
 
     const statut=row.insertCell();
-    statut.textContent = j.icone; // icône affichée
-    statut.title = j.statut;     // texte pour tooltip
-    statut.style.fontWeight="bold";
+    const icon=document.createElement("span");
+    icon.textContent=j.icone;
+    icon.title=j.statut;
+    icon.style.cursor="pointer";
+    icon.style.fontSize="18px";
+    icon.onclick=()=>changerStatut(index);
+    statut.appendChild(icon);
   });
+}
+
+// Changer le statut en cliquant sur l'icône
+function changerStatut(index){
+  let jeu = jeuxData[index];
+  if(jeu.statut==="A_acheter"){
+    jeu.statut="Collection";
+    jeu.icone="🎮";
+  } else {
+    jeu.statut="A_acheter";
+    jeu.icone="🛒";
+  }
+  appliquerFiltres(); // rafraîchir tableau et compteur
 }
 </script>
 </body>
