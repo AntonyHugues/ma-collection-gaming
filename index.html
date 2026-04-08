@@ -36,14 +36,16 @@ td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; o
   <select id="consoleSelect" onchange="appliquerFiltres()"></select>
 </div>
 
-<div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
-  <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
-</div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+  <div>
+    <button onclick="filtrerStatut(event,'all')" class="active">Tous</button>
+    <button onclick="filtrerStatut(event,'Collection')">🎮 Collection</button>
+    <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
+  </div>
 
-<div style="text-align:center; margin-top:10px;">
-  <button onclick="filtrerStatut(event,'all')" class="active">Tous</button>
-  <button onclick="filtrerStatut(event,'Collection')">🎮 Collection</button>
-  <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
+  <div>
+    <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
+  </div>
 </div>
 
 <table id="jeuxTable"></table>
