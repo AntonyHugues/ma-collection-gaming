@@ -58,9 +58,9 @@ td span.statutIcon { cursor:pointer; font-size:18px; }
 <div id="compteur"></div>
 
 <script>
-let allJeuxData = []; // Tous les jeux, jamais modifié
-let jeuxData = [];    // Jeux affichés (filtrés)
-let consolesActuelles = [];
+let allJeuxData = [];        // Tous les jeux (page d'accueil)
+let jeuxConstructeur = [];    // Jeux du constructeur sélectionné
+let jeuxData = [];            // Jeux affichés (après filtres)
 let statutActuel = "all";
 
 // Charger tous les jeux à l'accueil
@@ -68,7 +68,7 @@ fetch('data/index.json')
   .then(r => r.json())
   .then(fichiers => {
     const chemins = fichiers.map(f => 'data/' + f);
-    return Promise.all(chemins.map(f => 
+    return Promise.all(chemins.map(f =>
       fetch(f)
         .then(r => r.json())
         .then(data => Array.isArray(data) ? data : [])
@@ -78,7 +78,8 @@ fetch('data/index.json')
   .then(results => {
     results.forEach(arr => allJeuxData.push(...arr));
     allJeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
-    jeuxData = [...allJeuxData]; // Copier pour affichage
+    jeuxConstructeur = [...allJeuxData];
+    jeuxData = [...allJeuxData];
     afficherJeux(jeuxData);
     document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
   });
@@ -93,7 +94,7 @@ function choisirConstructeur(type){
     .then(r => r.json())
     .then(listeJson => {
       const chemins = listeJson.map(f=>'data/'+f);
-      return Promise.all(chemins.map(f => 
+      return Promise.all(chemins.map(f =>
         fetch(f)
           .then(r => r.json())
           .then(data => Array.isArray(data)? data: [])
@@ -101,34 +102,36 @@ function choisirConstructeur(type){
       ));
     })
     .then(results => {
-      let filtered = [];
-      results.forEach(arr => filtered.push(...arr));
-      filtered.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+      jeuxConstructeur = [];
+      results.forEach(arr => jeuxConstructeur.push(...arr));
+      jeuxConstructeur.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
 
-      // Mettre à jour le select des consoles
+      // Mettre à jour le select
       const select = document.getElementById("consoleSelect");
       select.innerHTML = '<option value="all">Toutes les consoles</option>';
-      const consoles = [...new Set(filtered.map(j=>j.console))];
-      consolesActuelles = consoles;
+      const consoles = [...new Set(jeuxConstructeur.map(j=>j.console))];
       consoles.forEach(c=>{
         const opt=document.createElement("option");
         opt.value=c; opt.textContent=c;
         select.appendChild(opt);
       });
       document.getElementById("consoleContainer").style.display="block";
+
+      // Reset filtres
       document.getElementById("searchInput").value="";
       statutActuel="all";
       document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
       document.querySelector("button[onclick*='all']").classList.add("active");
 
-      jeuxData = filtered; // mettre à jour jeuxData filtré constructeur
+      jeuxData = [...jeuxConstructeur]; // afficher tous les jeux du constructeur
       afficherJeux(jeuxData);
+      document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
     });
 }
 
-// Appliquer les filtres recherche/statut/console
+// Appliquer filtres (recherche / statut / console)
 function appliquerFiltres(){
-  let result = [...jeuxData]; // utiliser la liste filtrée constructeur si clic
+  let result = [...jeuxConstructeur]; // on part de la liste constructeur
   const search = document.getElementById("searchInput").value.toLowerCase();
   const select = document.getElementById("consoleSelect");
 
@@ -136,8 +139,49 @@ function appliquerFiltres(){
   if(search) result = result.filter(j=>j.nom.toLowerCase().includes(search));
   if(statutActuel !== "all") result = result.filter(j=>j.statut === statutActuel);
 
+  jeuxData = result;
   afficherJeux(result);
   document.getElementById("compteur").textContent = result.length + " jeu(x)";
+}
+
+// Filtrer par statut
+function filtrerStatut(e,val){
+  statutActuel = val;
+  document.querySelectorAll("#statusSearchContainer button").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active");
+  appliquerFiltres();
+}
+
+// Affichage du tableau
+function afficherJeux(liste){
+  const table = document.getElementById("jeuxTable");
+  table.innerHTML = '';
+  if(liste.length === 0) return;
+
+  // Entête
+  const header = table.insertRow();
+  header.insertCell().outerHTML="<th>Nom du jeu</th>";
+  header.insertCell().outerHTML="<th>Console</th>";
+  header.insertCell().outerHTML="<th>Statut</th>";
+
+  // Lignes
+  liste.forEach(j => {
+    const row = table.insertRow();
+    const nameCell = row.insertCell();
+    if(j.logo){
+      const img = document.createElement('img');
+      img.src = j.logo;
+      img.className = "logo";
+      nameCell.appendChild(img);
+    }
+    const span = document.createElement('span');
+    span.textContent = j.nom;
+    nameCell.appendChild(span);
+
+    row.insertCell().textContent = j.console;
+    const statutCell = row.insertCell();
+    statutCell.textContent = j.statut;
+  });
 }
 </script>
 
