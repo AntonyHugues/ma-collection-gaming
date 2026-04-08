@@ -5,24 +5,24 @@
 <title>Ma Collection Gaming Pro</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
-h1,h2{ color:#00cfff; text-align:center; margin-bottom:10px;}
-.card{ display:inline-block; padding:20px; margin:10px; background:#12325b; color:#00cfff; border-radius:15px; cursor:pointer; transition:0.3s;}
-.card:hover{ background:#1457a8; transform:scale(1.05);}
-.card.active{ background:#00cfff; color:#0b1e3b;}
-select,input{ padding:8px 12px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff;}
-input:focus{outline:none; box-shadow:0 0 8px #00cfff;}
-button{margin:0 5px;padding:6px 12px;background:#12325b;color:#00cfff;border:none;border-radius:8px;cursor:pointer;}
-button:hover{background:#1457a8;}
-button.active{background:#00cfff;color:#0b1e3b;}
-table{ width:100%; border-collapse:collapse; margin-top:10px; box-shadow:0 0 10px #00cfff66;}
-th,td{padding:12px;}
-th{ background:#12325b; color:#00cfff;}
-tr:nth-child(even){ background:#0f2a4c;}
-tr:hover{ background:#1457a8;}
-td img.logo{ width:24px; height:24px; margin-right:8px; vertical-align:middle; object-fit:contain;}
-td span.statutIcon{ cursor:pointer; font-size:18px; }
-#compteur{display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff;}
-#statusSearchContainer{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+h1,h2 { color:#00cfff; text-align:center; margin-bottom:10px; }
+.card { display:inline-block; padding:20px; margin:10px; background:#12325b; color:#00cfff; border-radius:15px; cursor:pointer; transition:0.3s; }
+.card:hover { background:#1457a8; transform:scale(1.05); }
+.card.active { background:#00cfff; color:#0b1e3b; }
+select,input { padding:8px 12px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff; }
+input:focus { outline:none; box-shadow:0 0 8px #00cfff; }
+button { margin:0 5px; padding:6px 12px; background:#12325b; color:#00cfff; border:none; border-radius:8px; cursor:pointer; }
+button:hover { background:#1457a8; }
+button.active { background:#00cfff; color:#0b1e3b; }
+table { width:100%; border-collapse:collapse; margin-top:10px; box-shadow:0 0 10px #00cfff66; }
+th,td { padding:12px; }
+th { background:#12325b; color:#00cfff; }
+tr:nth-child(even) { background:#0f2a4c; }
+tr:hover { background:#1457a8; }
+td img.logo { width:24px; height:24px; margin-right:8px; vertical-align:middle; object-fit:contain; }
+td span.statutIcon { cursor:pointer; font-size:18px; }
+#compteur { display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff; }
+#statusSearchContainer { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 @media(max-width:768px){
   #statusSearchContainer{flex-direction:column; align-items:flex-start;}
   #statusSearchContainer div{margin:5px 0;}
@@ -62,10 +62,10 @@ let jeuxData = [];
 let consolesActuelles = [];
 let statutActuel = "all";
 
-// JSON par console
+// JSON par constructeur
 const jsonParConstructeur = {
-  "nintendo": ["data/switch.json","data/nes.json","data/ps1.json"],  // mets tes fichiers Nintendo ici
-  "sony": ["data/ps1.json","data/ps2.json","data/ps3.json","data/ps4.json","data/ps5.json"] // fichiers PlayStation
+  "nintendo": ["data/switch.json"], // ajoute d'autres fichiers si besoin
+  "sony": ["data/ps5.json"] // ajoute d'autres fichiers si besoin
 };
 
 function choisirConstructeur(type){
@@ -73,36 +73,36 @@ function choisirConstructeur(type){
   document.getElementById("card-sony").classList.remove("active");
   document.getElementById("card-"+type).classList.add("active");
 
-  // Chargement des fichiers JSON correspondant
   const fichiers = jsonParConstructeur[type];
   jeuxData = [];
-  let promesses = fichiers.map(f => fetch(f).then(r=>r.json()));
 
-  Promise.all(promesses).then(results => {
-    results.forEach(arr => { jeuxData.push(...arr); });
+  Promise.all(fichiers.map(f => fetch(f).then(r=>r.json())))
+    .then(results => {
+      results.forEach(arr => jeuxData.push(...arr));
 
-    // Tri alphabétique
-    jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+      // Tri alphabétique
+      jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
 
-    // Remplir le select avec les consoles présentes
-    const select = document.getElementById("consoleSelect");
-    select.innerHTML = '<option value="all">Toutes les consoles</option>';
-    const consoles = [...new Set(jeuxData.map(j=>j.console))];
-    consolesActuelles = consoles;
-    consoles.forEach(c=>{
-      const opt=document.createElement("option");
-      opt.value=c;
-      opt.textContent=c;
-      select.appendChild(opt);
-    });
+      // Remplir le select avec les consoles présentes
+      const select = document.getElementById("consoleSelect");
+      select.innerHTML = '<option value="all">Toutes les consoles</option>';
+      const consoles = [...new Set(jeuxData.map(j=>j.console))];
+      consolesActuelles = consoles;
+      consoles.forEach(c=>{
+        const opt=document.createElement("option");
+        opt.value=c;
+        opt.textContent=c;
+        select.appendChild(opt);
+      });
 
-    document.getElementById("consoleContainer").style.display="block";
-    document.getElementById("searchInput").value="";
-    statutActuel="all";
-    document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-    document.querySelector("button[onclick*='all']").classList.add("active");
-    appliquerFiltres();
-  });
+      document.getElementById("consoleContainer").style.display="block";
+      document.getElementById("searchInput").value="";
+      statutActuel="all";
+      document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+      document.querySelector("button[onclick*='all']").classList.add("active");
+      appliquerFiltres();
+    })
+    .catch(err => console.error(err));
 }
 
 // Filtrer par statut
@@ -123,21 +123,17 @@ function appliquerFiltres(){
   if(search) result=result.filter(j=>j.nom.toLowerCase().includes(search));
   if(statutActuel !== "all") result=result.filter(j=>j.statut === statutActuel);
 
-  afficherJeux(result,true);
+  afficherJeux(result);
   document.getElementById("compteur").textContent = result.length + " jeu(x)";
 }
 
 // Afficher le tableau
 function afficherJeux(jeux){
   const table=document.getElementById("jeuxTable");
-  table.innerHTML="";
-
-  const header=table.insertRow();
-  header.innerHTML="<th>Nom</th><th>Console</th><th>Statut</th>";
+  table.innerHTML="<tr><th>Nom</th><th>Console</th><th>Statut</th></tr>";
 
   jeux.forEach((j,index)=>{
     const row=table.insertRow();
-
     const nom=row.insertCell();
     if(j.logo){
       const img=document.createElement("img");
@@ -172,5 +168,6 @@ function changerStatut(index){
   appliquerFiltres();
 }
 </script>
+
 </body>
 </html>
