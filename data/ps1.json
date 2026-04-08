@@ -86,8 +86,8 @@
   {
     "nom": "Driver",
     "console": "PS1",
-    "statut": "Collection",
-    "icone": "🎮",
+    "statut": "A_acheter",
+    "icone": "🛒",
     "logo": "images/logo-playstation.png"
   },
   {
