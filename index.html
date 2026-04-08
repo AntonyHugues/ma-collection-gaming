@@ -17,7 +17,7 @@ h1, h2 {
   text-align: center;
 }
 
-/* Cartes constructeur */
+/* Cartes */
 .card {
   display: inline-block;
   padding: 20px;
@@ -51,6 +51,21 @@ select {
   color: #e0f7ff;
   margin-bottom: 20px;
   cursor: pointer;
+}
+
+/* Recherche */
+input {
+  padding:10px;
+  width:250px;
+  border-radius:8px;
+  border:none;
+  background:#12325b;
+  color:#e0f7ff;
+}
+
+input:focus {
+  outline: none;
+  box-shadow: 0 0 8px #00cfff;
 }
 
 /* Tableau */
@@ -108,51 +123,56 @@ td img.logo {
 
 <div id="consoleContainer" style="text-align:center; margin-top:20px; display:none;">
   <h2>Choisir une console :</h2>
-  <select id="consoleSelect" onchange="filtrerJeux()"></select>
+  <select id="consoleSelect" onchange="appliquerFiltres()"></select>
+</div>
+
+<!-- 🔍 Recherche -->
+<div style="text-align:center; margin-top:20px;">
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="🔍 Rechercher un jeu..." 
+    oninput="appliquerFiltres()"
+  >
 </div>
 
 <table id="jeuxTable"></table>
 
 <script>
 let jeuxData = [];
+let consolesActuelles = [];
 
 // Charger JSON
 fetch('data/jeux.json')
   .then(response => response.json())
   .then(data => {
     jeuxData = data;
-
-    // Tri alphabétique
-    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity:'base'}));
-
+    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom,'fr',{sensitivity:'base'}));
     afficherJeux(jeuxData, false);
   })
   .catch(err => console.error('Erreur:', err));
 
-// Choisir constructeur
+// Choix constructeur
 function choisirConstructeur(type) {
   const select = document.getElementById("consoleSelect");
   const container = document.getElementById("consoleContainer");
 
-  // reset bouton actif
+  // reset boutons
   document.getElementById("card-nintendo").classList.remove("active");
   document.getElementById("card-sony").classList.remove("active");
   document.getElementById("card-" + type).classList.add("active");
 
   select.innerHTML = '';
 
-  let consoles = [];
-
   if (type === "nintendo") {
-    consoles = ["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
+    consolesActuelles = ["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
   }
 
   if (type === "sony") {
-    consoles = ["PS1","PS2","PS3","PS4","PS5"];
+    consolesActuelles = ["PS1","PS2","PS3","PS4","PS5"];
   }
 
-  // remplir menu
-  consoles.forEach(c => {
+  consolesActuelles.forEach(c => {
     const option = document.createElement("option");
     option.value = c;
     option.textContent = c;
@@ -161,9 +181,32 @@ function choisirConstructeur(type) {
 
   container.style.display = "block";
 
-  // afficher tous les jeux du constructeur
-  const filtered = jeuxData.filter(j => consoles.includes(j.console));
-  afficherJeux(filtered, false);
+  appliquerFiltres();
+}
+
+// Filtres combinés
+function appliquerFiltres() {
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const select = document.getElementById("consoleSelect");
+
+  let result = jeuxData;
+
+  // filtre constructeur
+  if (consolesActuelles.length > 0) {
+    result = result.filter(j => consolesActuelles.includes(j.console));
+  }
+
+  // filtre console
+  if (select && select.value) {
+    result = result.filter(j => j.console === select.value);
+  }
+
+  // filtre recherche
+  if (search) {
+    result = result.filter(j => j.nom.toLowerCase().includes(search));
+  }
+
+  afficherJeux(result, consolesActuelles.length > 0);
 }
 
 // Affichage tableau
@@ -171,7 +214,6 @@ function afficherJeux(jeux, cacherConsole) {
   const table = document.getElementById('jeuxTable');
   table.innerHTML = '';
 
-  // Entête
   const header = table.insertRow();
 
   const thNom = document.createElement('th');
@@ -188,7 +230,6 @@ function afficherJeux(jeux, cacherConsole) {
   thStatut.textContent = "Statut";
   header.appendChild(thStatut);
 
-  // Lignes
   jeux.forEach(jeu => {
     const row = table.insertRow();
 
@@ -212,24 +253,14 @@ function afficherJeux(jeux, cacherConsole) {
 
     const statutCell = row.insertCell();
     statutCell.textContent = jeu.statut;
+    statutCell.style.fontWeight = "bold";
 
-    // couleur statut
     if (jeu.statut === "Dans la collection") {
       statutCell.style.color = "#4cff88";
     } else if (jeu.statut === "À acheter") {
       statutCell.style.color = "#ff5c5c";
     }
-
-    statutCell.style.fontWeight = "bold";
   });
-}
-
-// Filtrer console
-function filtrerJeux() {
-  const valeur = document.getElementById("consoleSelect").value;
-
-  const filtered = jeuxData.filter(j => j.console === valeur);
-  afficherJeux(filtered, true);
 }
 </script>
 
