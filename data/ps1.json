@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "nom": "LLEGO Racers",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Harry Potter à l'école des sorciers",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Harry Potter et la Chambre des Secrets",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  }
+]
