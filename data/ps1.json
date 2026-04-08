@@ -229,6 +229,27 @@
     "statut": "A_acheter",
     "icone": "🛒",
     "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Syphon Filter",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Syphon Filter 2",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Syphon Filter 3",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
   }
 
 ]
