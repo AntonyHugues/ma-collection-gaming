@@ -162,7 +162,7 @@ function choisirConstructeur(type) {
   document.getElementById("card-sony").classList.remove("active");
   document.getElementById("card-" + type).classList.add("active");
 
-  select.innerHTML = '';
+  select.innerHTML = '<option value="all">Toutes les consoles</option>';
 
   if (type === "nintendo") {
     consolesActuelles = ["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
@@ -197,7 +197,7 @@ function appliquerFiltres() {
   }
 
   // filtre console
-  if (select && select.value) {
+  if (select && select.value && select.value !== "all") {
     result = result.filter(j => j.console === select.value);
   }
 
