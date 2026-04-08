@@ -15,12 +15,11 @@ button { margin:0 5px; padding:6px 12px; background:#12325b; color:#00cfff; bord
 button:hover { background:#1457a8; }
 button.active { background:#00cfff; color:#0b1e3b; }
 table { width:100%; border-collapse:collapse; margin-top:10px; box-shadow:0 0 10px #00cfff66; }
-th,td { padding:12px; }
+th,td { padding:12px; text-align:left; }
 th { background:#12325b; color:#00cfff; }
 tr:nth-child(even) { background:#0f2a4c; }
 tr:hover { background:#1457a8; }
 td img.logo { width:24px; height:24px; margin-right:8px; vertical-align:middle; object-fit:contain; }
-td span.statutIcon { cursor:pointer; font-size:18px; }
 #compteur { display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff; }
 #statusSearchContainer { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 @media(max-width:768px){
@@ -58,10 +57,11 @@ td span.statutIcon { cursor:pointer; font-size:18px; }
 <div id="compteur"></div>
 
 <script>
-let allJeuxData = [];        // Tous les jeux (page d'accueil)
-let jeuxConstructeur = [];    // Jeux du constructeur sélectionné
-let jeuxData = [];            // Jeux affichés (après filtres)
+let allJeuxData = [];
+let jeuxConstructeur = [];
+let jeuxData = [];
 let statutActuel = "all";
+let consoleChoisie = null;
 
 // Charger tous les jeux à l'accueil
 fetch('data/index.json')
@@ -80,7 +80,7 @@ fetch('data/index.json')
     allJeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
     jeuxConstructeur = [...allJeuxData];
     jeuxData = [...allJeuxData];
-    afficherJeux(jeuxData);
+    afficherJeux(jeuxData, false);
     document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
   });
 
@@ -120,27 +120,30 @@ function choisirConstructeur(type){
       // Reset filtres
       document.getElementById("searchInput").value="";
       statutActuel="all";
+      consoleChoisie = null;
       document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
       document.querySelector("button[onclick*='all']").classList.add("active");
 
-      jeuxData = [...jeuxConstructeur]; // afficher tous les jeux du constructeur
-      afficherJeux(jeuxData);
+      jeuxData = [...jeuxConstructeur];
+      afficherJeux(jeuxData, false);
       document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
     });
 }
 
-// Appliquer filtres (recherche / statut / console)
+// Appliquer filtres
 function appliquerFiltres(){
-  let result = [...jeuxConstructeur]; // on part de la liste constructeur
+  let result = [...jeuxConstructeur];
   const search = document.getElementById("searchInput").value.toLowerCase();
   const select = document.getElementById("consoleSelect");
 
-  if(select && select.value !== "all") result = result.filter(j=>j.console===select.value);
+  consoleChoisie = select && select.value !== "all" ? select.value : null;
+
+  if(consoleChoisie) result = result.filter(j=>j.console === consoleChoisie);
   if(search) result = result.filter(j=>j.nom.toLowerCase().includes(search));
   if(statutActuel !== "all") result = result.filter(j=>j.statut === statutActuel);
 
   jeuxData = result;
-  afficherJeux(result);
+  afficherJeux(result, !!consoleChoisie);
   document.getElementById("compteur").textContent = result.length + " jeu(x)";
 }
 
@@ -153,7 +156,7 @@ function filtrerStatut(e,val){
 }
 
 // Affichage du tableau
-function afficherJeux(liste){
+function afficherJeux(liste, cacherConsole){
   const table = document.getElementById("jeuxTable");
   table.innerHTML = '';
   if(liste.length === 0) return;
@@ -161,7 +164,7 @@ function afficherJeux(liste){
   // Entête
   const header = table.insertRow();
   header.insertCell().outerHTML="<th>Nom du jeu</th>";
-  header.insertCell().outerHTML="<th>Console</th>";
+  if(!cacherConsole) header.insertCell().outerHTML="<th>Console</th>";
   header.insertCell().outerHTML="<th>Statut</th>";
 
   // Lignes
@@ -178,9 +181,12 @@ function afficherJeux(liste){
     span.textContent = j.nom;
     nameCell.appendChild(span);
 
-    row.insertCell().textContent = j.console;
+    if(!cacherConsole){
+      row.insertCell().textContent = j.console;
+    }
+
     const statutCell = row.insertCell();
-    statutCell.textContent = j.statut;
+    statutCell.textContent = j.icone || '';
   });
 }
 </script>
