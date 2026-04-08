@@ -215,6 +215,20 @@
     "statut": "A_acheter",
     "icone": "🛒",
     "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Dino Crisis",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Dino Crisis 2",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
   }
 
 ]
