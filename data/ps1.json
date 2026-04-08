@@ -70,7 +70,14 @@
     "logo": "images/logo-playstation.png"
   },
   {
-    "nom": "Final Fantasy IX",
+    "nom": "Oddworld: Abe's Oddysee",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Oddworld: Abe's Exoddus",
     "console": "PS1",
     "statut": "Collection",
     "icone": "🎮",
