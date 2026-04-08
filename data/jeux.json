@@ -4,27 +4,27 @@
     "console": "Nintendo Switch",
     "statut": "A_acheter",
     "icone": "🛒",
-    "logo": "images/logo-nintendo-ds.pn"
+    "logo": "images/logo-nintendo-ds.png"
   },
   {
     "nom": "Mario Kart 8",
     "console": "Nintendo Switch",
     "statut": "Collection",
     "icone": "🎮",
-    "logo": "images/logo-nintendo-ds.pn"
+    "logo": "images/logo-nintendo-ds.png"
   },
   {
     "nom": "GTA V",
     "console": "PS5",
     "statut": "A_acheter",
     "icone": "🛒",
-    "logo": "images/logo-nintendo-ds.pn"
+    "logo": "images/logo-nintendo-ds.png"
   },
   {
     "nom": "Spider-Man: Miles Morales",
     "console": "PS5",
     "statut": "Collection",
     "icone": "🎮",
-    "logo": "images/logo-nintendo-ds.pn"
+    "logo": "images/logo-nintendo-ds.png"
   }
 ]
