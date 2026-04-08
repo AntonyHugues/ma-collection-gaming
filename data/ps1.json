@@ -142,8 +142,22 @@
   {
     "nom": "MediEvil II",
     "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
+  }
+  {
+    "nom": "Metal Gear Solid",
+    "console": "PS1",
     "statut": "Collection",
     "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  }
+  {
+    "nom": "Metal Gear Solid: Special Missions",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
     "logo": "images/logo-playstation.png"
   }
 ]
