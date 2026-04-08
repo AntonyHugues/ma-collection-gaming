@@ -285,6 +285,20 @@
     "statut": "Collection",
     "icone": "🎮",
     "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "007: Demain ne meurt jamais",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
   }
-  
+  {
+    "nom": "007: Le Monde ne suffit pas",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  }
+
 ]
