@@ -58,45 +58,56 @@ td span.statutIcon { cursor:pointer; font-size:18px; }
 <div id="compteur"></div>
 
 <script>
-let jeuxData = [];
+let allJeuxData = []; // Tous les jeux, jamais modifié
+let jeuxData = [];    // Jeux affichés (filtrés)
 let consolesActuelles = [];
 let statutActuel = "all";
 
-// Charger tous les jeux dès le départ
+// Charger tous les jeux à l'accueil
 fetch('data/index.json')
-  .then(r=>r.json())
-  .then(fichiers=>{
+  .then(r => r.json())
+  .then(fichiers => {
     const chemins = fichiers.map(f => 'data/' + f);
-    return Promise.all(chemins.map(f => fetch(f).then(r=>r.json())));
+    return Promise.all(chemins.map(f => 
+      fetch(f)
+        .then(r => r.json())
+        .then(data => Array.isArray(data) ? data : [])
+        .catch(err => { console.warn("JSON vide ou invalide:", f); return []; })
+    ));
   })
-  .then(results=>{
-    results.forEach(arr => jeuxData.push(...arr));
-    jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+  .then(results => {
+    results.forEach(arr => allJeuxData.push(...arr));
+    allJeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+    jeuxData = [...allJeuxData]; // Copier pour affichage
     afficherJeux(jeuxData);
     document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
-  })
-  .catch(err=>console.error(err));
+  });
 
-// Choisir constructeur (charge uniquement les consoles de ce constructeur)
+// Choisir constructeur
 function choisirConstructeur(type){
   document.getElementById("card-nintendo").classList.remove("active");
   document.getElementById("card-sony").classList.remove("active");
   document.getElementById("card-"+type).classList.add("active");
 
   fetch(`data/${type}.json`)
-    .then(r=>r.json())
-    .then(listeJson=>{
+    .then(r => r.json())
+    .then(listeJson => {
       const chemins = listeJson.map(f=>'data/'+f);
-      return Promise.all(chemins.map(f=>fetch(f).then(r=>r.json())));
+      return Promise.all(chemins.map(f => 
+        fetch(f)
+          .then(r => r.json())
+          .then(data => Array.isArray(data)? data: [])
+          .catch(err => { console.warn("JSON vide ou invalide:", f); return []; })
+      ));
     })
-    .then(results=>{
+    .then(results => {
       let filtered = [];
       results.forEach(arr => filtered.push(...arr));
       filtered.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
 
-      // Remplir le select
+      // Mettre à jour le select des consoles
       const select = document.getElementById("consoleSelect");
-      select.innerHTML='<option value="all">Toutes les consoles</option>';
+      select.innerHTML = '<option value="all">Toutes les consoles</option>';
       const consoles = [...new Set(filtered.map(j=>j.console))];
       consolesActuelles = consoles;
       consoles.forEach(c=>{
@@ -109,72 +120,24 @@ function choisirConstructeur(type){
       statutActuel="all";
       document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
       document.querySelector("button[onclick*='all']").classList.add("active");
-      afficherJeux(filtered);
-    })
-    .catch(err=>console.error(err));
+
+      jeuxData = filtered; // mettre à jour jeuxData filtré constructeur
+      afficherJeux(jeuxData);
+    });
 }
 
-// Filtrer par statut
-function filtrerStatut(event,statut){
-  statutActuel=statut;
-  document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
-  appliquerFiltres();
-}
-
-// Appliquer tous les filtres
+// Appliquer les filtres recherche/statut/console
 function appliquerFiltres(){
-  let result = jeuxData;
+  let result = [...jeuxData]; // utiliser la liste filtrée constructeur si clic
   const search = document.getElementById("searchInput").value.toLowerCase();
   const select = document.getElementById("consoleSelect");
 
-  if(select && select.value !== "all") result=result.filter(j=>j.console===select.value);
-  if(search) result=result.filter(j=>j.nom.toLowerCase().includes(search));
-  if(statutActuel !== "all") result=result.filter(j=>j.statut === statutActuel);
+  if(select && select.value !== "all") result = result.filter(j=>j.console===select.value);
+  if(search) result = result.filter(j=>j.nom.toLowerCase().includes(search));
+  if(statutActuel !== "all") result = result.filter(j=>j.statut === statutActuel);
 
   afficherJeux(result);
   document.getElementById("compteur").textContent = result.length + " jeu(x)";
-}
-
-// Afficher le tableau
-function afficherJeux(jeux){
-  const table=document.getElementById("jeuxTable");
-  table.innerHTML="<tr><th>Nom</th><th>Console</th><th>Statut</th></tr>";
-
-  jeux.forEach((j,index)=>{
-    const row=table.insertRow();
-    const nom=row.insertCell();
-    if(j.logo){
-      const img=document.createElement("img");
-      img.src=j.logo;
-      img.className="logo";
-      nom.appendChild(img);
-    }
-    nom.appendChild(document.createTextNode(j.nom));
-
-    row.insertCell().textContent=j.console;
-
-    const statut=row.insertCell();
-    const icon=document.createElement("span");
-    icon.textContent=j.icone;
-    icon.title=j.statut;
-    icon.className="statutIcon";
-    icon.onclick=()=>changerStatut(index);
-    statut.appendChild(icon);
-  });
-}
-
-// Changer le statut en cliquant sur l’icône
-function changerStatut(index){
-  let jeu = jeuxData[index];
-  if(jeu.statut==="A_acheter"){
-    jeu.statut="Collection";
-    jeu.icone="🎮";
-  } else {
-    jeu.statut="A_acheter";
-    jeu.icone="🛒";
-  }
-  appliquerFiltres();
 }
 </script>
 
