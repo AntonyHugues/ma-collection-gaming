@@ -40,5 +40,12 @@
     "statut": "Collection",
     "icone": "🎮",
     "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Crash Team Racing",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
   }
 ]
