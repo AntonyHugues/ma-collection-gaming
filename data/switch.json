@@ -4,13 +4,13 @@
     "console": "Nintendo Switch",
     "statut": "A_acheter",
     "icone": "🛒",
-    "logo": "images/logo-nintendo-ds.png"
+    "logo": "images/logo-nintendo-switch.png"
   },
   {
     "nom": "Mario Kart 8",
     "console": "Nintendo Switch",
     "statut": "Collection",
     "icone": "🎮",
-    "logo": "images/logo-nintendo-ds.png"
+    "logo": "images/logo-nintendo-switch.png"
   }
 ]
