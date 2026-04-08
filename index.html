@@ -141,125 +141,135 @@ td img.logo {
 <script>
 let jeuxData = [];
 let consolesActuelles = [];
+let statutActuel = "all";
 
 // Charger JSON
 fetch('data/jeux.json')
-  .then(response => response.json())
-  .then(data => {
-    jeuxData = data;
-    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom,'fr',{sensitivity:'base'}));
-    afficherJeux(jeuxData, false);
-  })
-  .catch(err => console.error('Erreur:', err));
+.then(r => r.json())
+.then(data => {
+  jeuxData = data;
+  jeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+  afficherJeux(jeuxData,false);
 
-// Choix constructeur
-function choisirConstructeur(type) {
-  const select = document.getElementById("consoleSelect");
-  const container = document.getElementById("consoleContainer");
+  // afficher compteur au départ
+  document.getElementById("compteur").textContent =
+    jeuxData.length + " jeu(x)";
+});
 
-  // reset boutons
+// Constructeur
+function choisirConstructeur(type){
   document.getElementById("card-nintendo").classList.remove("active");
   document.getElementById("card-sony").classList.remove("active");
-  document.getElementById("card-" + type).classList.add("active");
+  document.getElementById("card-"+type).classList.add("active");
 
+  const select = document.getElementById("consoleSelect");
+
+  // 🔥 IMPORTANT : reset propre
   select.innerHTML = '<option value="all">Toutes les consoles</option>';
 
-  if (type === "nintendo") {
-    consolesActuelles = ["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
+  if(type==="nintendo"){
+    consolesActuelles=["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
   }
 
-  if (type === "sony") {
-    consolesActuelles = ["PS1","PS2","PS3","PS4","PS5"];
+  if(type==="sony"){
+    consolesActuelles=["PS1","PS2","PS3","PS4","PS5"];
   }
 
-  consolesActuelles.forEach(c => {
-    const option = document.createElement("option");
-    option.value = c;
-    option.textContent = c;
-    select.appendChild(option);
+  consolesActuelles.forEach(c=>{
+    const opt=document.createElement("option");
+    opt.value=c;
+    opt.textContent=c;
+    select.appendChild(opt);
   });
 
-  container.style.display = "block";
+  document.getElementById("consoleContainer").style.display="block";
+
+  // reset filtres
+  document.getElementById("searchInput").value="";
+  statutActuel="all";
+
+  // reset boutons statut (CORRIGÉ)
+  document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  document.querySelector("button[onclick*='all']").classList.add("active");
 
   appliquerFiltres();
 }
 
-// Filtres combinés
-function appliquerFiltres() {
+// Statut
+function filtrerStatut(event,statut){
+  statutActuel=statut;
+
+  // reset boutons (CORRIGÉ)
+  document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
+
+  appliquerFiltres();
+}
+
+// Filtres
+function appliquerFiltres(){
+  let result = jeuxData;
+
   const search = document.getElementById("searchInput").value.toLowerCase();
   const select = document.getElementById("consoleSelect");
 
-  let result = jeuxData;
-
-  // filtre constructeur
-  if (consolesActuelles.length > 0) {
-    result = result.filter(j => consolesActuelles.includes(j.console));
+  // constructeur
+  if(consolesActuelles.length>0){
+    result=result.filter(j=>consolesActuelles.includes(j.console));
   }
 
-  // filtre console
-  if (select && select.value && select.value !== "all") {
-    result = result.filter(j => j.console === select.value);
+  // console
+  if(select && select.value !== "all"){
+    result=result.filter(j=>j.console===select.value);
   }
 
-  // filtre recherche
-  if (search) {
-    result = result.filter(j => j.nom.toLowerCase().includes(search));
+  // recherche
+  if(search){
+    result=result.filter(j=>j.nom.toLowerCase().includes(search));
   }
 
-  afficherJeux(result, consolesActuelles.length > 0);
+  // statut (CORRIGÉ)
+  if(statutActuel !== "all"){
+    result=result.filter(j=>j.statut === statutActuel);
+  }
+
+  afficherJeux(result,consolesActuelles.length>0);
+
+  // compteur (CORRIGÉ)
+  document.getElementById("compteur").textContent =
+    result.length + " jeu(x)";
 }
 
-// Affichage tableau
-function afficherJeux(jeux, cacherConsole) {
-  const table = document.getElementById('jeuxTable');
-  table.innerHTML = '';
+// Tableau
+function afficherJeux(jeux,cacherConsole){
+  const table=document.getElementById("jeuxTable");
+  table.innerHTML="";
 
-  const header = table.insertRow();
+  const header=table.insertRow();
+  header.innerHTML="<th>Nom</th>"+(!cacherConsole?"<th>Console</th>":"")+"<th>Statut</th>";
 
-  const thNom = document.createElement('th');
-  thNom.textContent = "Nom du jeu";
-  header.appendChild(thNom);
+  jeux.forEach(j=>{
+    const row=table.insertRow();
 
-  if (!cacherConsole) {
-    const thConsole = document.createElement('th');
-    thConsole.textContent = "Console";
-    header.appendChild(thConsole);
-  }
+    const nom=row.insertCell();
+    if(j.logo){
+      const img=document.createElement("img");
+      img.src=j.logo;
+      img.className="logo";
+      nom.appendChild(img);
+    }
+    nom.appendChild(document.createTextNode(j.nom));
 
-  const thStatut = document.createElement('th');
-  thStatut.textContent = "Statut";
-  header.appendChild(thStatut);
-
-  jeux.forEach(jeu => {
-    const row = table.insertRow();
-
-    const nameCell = row.insertCell();
-
-    if (jeu.logo) {
-      const logo = document.createElement('img');
-      logo.src = jeu.logo;
-      logo.className = "logo";
-      nameCell.appendChild(logo);
+    if(!cacherConsole){
+      row.insertCell().textContent=j.console;
     }
 
-    const span = document.createElement('span');
-    span.textContent = jeu.nom;
-    nameCell.appendChild(span);
+    const statut=row.insertCell();
+    statut.textContent=j.statut;
+    statut.style.fontWeight="bold";
 
-    if (!cacherConsole) {
-      const consoleCell = row.insertCell();
-      consoleCell.textContent = jeu.console;
-    }
-
-    const statutCell = row.insertCell();
-    statutCell.textContent = jeu.statut;
-    statutCell.style.fontWeight = "bold";
-
-    if (jeu.statut === "Dans la collection") {
-      statutCell.style.color = "#4cff88";
-    } else if (jeu.statut === "À acheter") {
-      statutCell.style.color = "#ff5c5c";
-    }
+    if(j.statut==="Dans la collection") statut.style.color="#4cff88";
+    if(j.statut==="À acheter") statut.style.color="#ff5c5c";
   });
 }
 </script>
