@@ -201,5 +201,20 @@
     "statut": "A_acheter",
     "icone": "🛒",
     "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Spider-Man",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Spider-Man 2: Enter Electro",
+    "console": "PS1",
+    "statut": "A_acheter",
+    "icone": "🛒",
+    "logo": "images/logo-playstation.png"
   }
+
 ]
