@@ -3,169 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <title>Ma Collection Gaming</title>
-<style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #0b1e3b;
-    color: #e0f7ff;
-    padding: 20px;
-  }
-  h1 { text-align:center; color:#00cfff; }
-  
-  /* Cartes constructeur */
-  .card-container {
-    text-align:center;
-    margin-bottom:20px;
-  }
-  .card {
-    display: inline-block;
-    padding: 20px 30px;
-    margin: 10px;
-    background: #12325b;
-    color: #00cfff;
-    border-radius: 15px;
-    cursor: pointer;
-    font-size: 18px;
-    transition: 0.3s;
-    vertical-align: middle;
-  }
-  .card img {
-    width: 40px;
-    height: 40px;
-    vertical-align: middle;
-    margin-right: 8px;
-  }
-  .card:hover { background:#1457a8; transform:scale(1.05); }
-  .card.active { background:#00cfff; color:#0b1e3b; transform:scale(1.08); }
 
-  /* Tableau transformé en cartes */
-  #jeuxTable {
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:15px;
-    margin-top:20px;
-  }
-  .jeu-card {
-    background:#12325b;
-    border-radius:15px;
-    padding:15px;
-    width:200px;
-    text-align:center;
-    box-shadow:0 0 10px #00cfff66;
-    transition:0.3s;
-  }
-  .jeu-card:hover { background:#1457a8; transform:scale(1.05); }
-  .jeu-card img { width:64px; height:64px; object-fit:contain; margin-bottom:10px; }
-  .jeu-card h3 { margin:5px 0; color:#00cfff; font-size:16px; }
-  .jeu-card p { margin:3px 0; font-size:14px; }
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0b1e3b;
+  color: #e0f7ff;
+  padding: 20px;
+}
+
+h1, h2 {
+  color: #00cfff;
+  text-align: center;
+}
+
+/* Cartes constructeur */
+.card {
+  display: inline-block;
+  padding: 20px;
+  margin: 10px;
+  background: #12325b;
+  color: #00cfff;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  background: #1457a8;
+  transform: scale(1.05);
+}
+
+.card.active {
+  background: #00cfff;
+  color: #0b1e3b;
+  transform: scale(1.08);
+}
+
+/* Select */
+select {
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #12325b;
+  color: #e0f7ff;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+/* Tableau */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  box-shadow: 0 0 10px #00cfff66;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #12325b;
+  color: #00cfff;
+}
+
+tr:nth-child(even) {
+  background-color: #0f2a4c;
+}
+
+tr:hover {
+  background-color: #1457a8;
+  transition: 0.3s;
+}
+
+td {
+  color: #e0f7ff;
+  vertical-align: middle;
+}
+
+td img.logo {
+  width: 24px !important;
+  height: 24px !important;
+  object-fit: contain;
+  margin-right: 8px;
+  vertical-align: middle;
+}
 </style>
 </head>
+
 <body>
 
 <h1>🎮 Ma Collection Gaming</h1>
-<h2 style="text-align:center;">Choisir un constructeur :</h2>
 
-<div class="card-container">
-  <div class="card" id="card-nintendo" onclick="choisirConstructeur('nintendo')">
-    <img src="images/logo-nintendo.png" alt="Nintendo Logo">Nintendo
-  </div>
-  <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">
-    <img src="images/logo-sony-playStation.png" alt="Sony Logo">PlayStation
-  </div>
+<h2>Choisir un constructeur :</h2>
+
+<div style="text-align:center;">
+  <div class="card" id="card-nintendo" onclick="choisirConstructeur('nintendo')">🎮 Nintendo</div>
+  <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">🎮 PlayStation</div>
 </div>
 
-<div id="consoleContainer" style="text-align:center; margin-bottom:20px; display:none;">
+<div id="consoleContainer" style="text-align:center; margin-top:20px; display:none;">
+  <h2>Choisir une console :</h2>
   <select id="consoleSelect" onchange="filtrerJeux()"></select>
 </div>
 
-<div id="jeuxTable"></div>
+<table id="jeuxTable"></table>
 
 <script>
 let jeuxData = [];
 
 // Charger JSON
 fetch('data/jeux.json')
-  .then(res => res.json())
+  .then(response => response.json())
   .then(data => {
     jeuxData = data;
-    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom,'fr',{sensitivity:'base'}));
+
+    // Tri alphabétique
+    jeuxData.sort((a,b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity:'base'}));
+
     afficherJeux(jeuxData, false);
   })
-  .catch(err=>console.error('Erreur:',err));
+  .catch(err => console.error('Erreur:', err));
 
-// Choix constructeur
-function choisirConstructeur(type){
+// Choisir constructeur
+function choisirConstructeur(type) {
   const select = document.getElementById("consoleSelect");
   const container = document.getElementById("consoleContainer");
 
-  // reset carte active
+  // reset bouton actif
   document.getElementById("card-nintendo").classList.remove("active");
   document.getElementById("card-sony").classList.remove("active");
-  document.getElementById("card-"+type).classList.add("active");
+  document.getElementById("card-" + type).classList.add("active");
 
   select.innerHTML = '';
-  let consoles = [];
-  if(type==='nintendo') consoles=["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
-  if(type==='sony') consoles=["PS1","PS2","PS3","PS4","PS5"];
 
-  // remplir select
-  consoles.forEach(c=>{
+  let consoles = [];
+
+  if (type === "nintendo") {
+    consoles = ["NES","Super Nintendo","N64","Game Cube","WII","WII U","Nintendo Switch"];
+  }
+
+  if (type === "sony") {
+    consoles = ["PS1","PS2","PS3","PS4","PS5"];
+  }
+
+  // remplir menu
+  consoles.forEach(c => {
     const option = document.createElement("option");
-    option.value=c;
-    option.textContent=c;
+    option.value = c;
+    option.textContent = c;
     select.appendChild(option);
   });
 
   container.style.display = "block";
 
   // afficher tous les jeux du constructeur
-  const filtered = jeuxData.filter(j=>consoles.includes(j.console));
-  afficherJeux(filtered,true);
+  const filtered = jeuxData.filter(j => consoles.includes(j.console));
+  afficherJeux(filtered, false);
 }
 
-// Affichage cartes de jeux
-function afficherJeux(jeux,cacherConsole){
+// Affichage tableau
+function afficherJeux(jeux, cacherConsole) {
   const table = document.getElementById('jeuxTable');
-  table.innerHTML='';
+  table.innerHTML = '';
 
-  jeux.forEach(jeu=>{
-    const card = document.createElement('div');
-    card.className='jeu-card';
+  // Entête
+  const header = table.insertRow();
 
-    if(jeu.logo){
-      const img = document.createElement('img');
-      img.src=jeu.logo;
-      card.appendChild(img);
+  const thNom = document.createElement('th');
+  thNom.textContent = "Nom du jeu";
+  header.appendChild(thNom);
+
+  if (!cacherConsole) {
+    const thConsole = document.createElement('th');
+    thConsole.textContent = "Console";
+    header.appendChild(thConsole);
+  }
+
+  const thStatut = document.createElement('th');
+  thStatut.textContent = "Statut";
+  header.appendChild(thStatut);
+
+  // Lignes
+  jeux.forEach(jeu => {
+    const row = table.insertRow();
+
+    const nameCell = row.insertCell();
+
+    if (jeu.logo) {
+      const logo = document.createElement('img');
+      logo.src = jeu.logo;
+      logo.className = "logo";
+      nameCell.appendChild(logo);
     }
 
-    const title = document.createElement('h3');
-    title.textContent=jeu.nom;
-    card.appendChild(title);
+    const span = document.createElement('span');
+    span.textContent = jeu.nom;
+    nameCell.appendChild(span);
 
-    if(!cacherConsole){
-      const cons = document.createElement('p');
-      cons.textContent=jeu.console;
-      card.appendChild(cons);
+    if (!cacherConsole) {
+      const consoleCell = row.insertCell();
+      consoleCell.textContent = jeu.console;
     }
 
-    const status = document.createElement('p');
-    status.textContent=jeu.statut;
-    card.appendChild(status);
+    const statutCell = row.insertCell();
+    statutCell.textContent = jeu.statut;
 
-    table.appendChild(card);
+    // couleur statut
+    if (jeu.statut === "Dans la collection") {
+      statutCell.style.color = "#4cff88";
+    } else if (jeu.statut === "À acheter") {
+      statutCell.style.color = "#ff5c5c";
+    }
+
+    statutCell.style.fontWeight = "bold";
   });
 }
 
-// Filtrer par console
-function filtrerJeux(){
+// Filtrer console
+function filtrerJeux() {
   const valeur = document.getElementById("consoleSelect").value;
-  if(valeur==="all") afficherJeux(jeuxData,false);
-  else{
-    const filtered = jeuxData.filter(j=>j.console===valeur);
-    afficherJeux(filtered,true);
-  }
+
+  const filtered = jeuxData.filter(j => j.console === valeur);
+  afficherJeux(filtered, true);
 }
 </script>
+
 </body>
 </html>
