@@ -19,5 +19,26 @@
     "statut": "Collection",
     "icone": "🎮",
     "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Crash Bandicoot",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Crash Bandicoot 2: Cortex Strikes Back",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
+  },
+  {
+    "nom": "Crash Bandicoot: Warped",
+    "console": "PS1",
+    "statut": "Collection",
+    "icone": "🎮",
+    "logo": "images/logo-playstation.png"
   }
 ]
