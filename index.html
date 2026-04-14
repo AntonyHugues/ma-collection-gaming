@@ -7,22 +7,21 @@
 <style>
 body { font-family: 'Segoe UI', sans-serif; background:#0b1e3b; color:#e0f7ff; padding:20px; }
 
-h1 { color:#00cfff; text-align:center; }
+h1 { text-align:center; color:#00cfff; }
 
 .card {
   display:inline-block;
-  padding:20px;
+  padding:15px;
   margin:10px;
   background:#12325b;
   color:#00cfff;
-  border-radius:15px;
+  border-radius:12px;
   cursor:pointer;
 }
-.card:hover { background:#1457a8; transform:scale(1.05); }
 .card.active { background:#00cfff; color:#0b1e3b; }
 
 button {
-  margin:4px;
+  margin:3px;
   padding:6px 10px;
   border:none;
   border-radius:8px;
@@ -33,7 +32,7 @@ button {
 button.active { background:#00cfff; color:#0b1e3b; }
 
 input, select {
-  padding:8px;
+  padding:6px;
   border-radius:8px;
   border:none;
   background:#12325b;
@@ -42,26 +41,38 @@ input, select {
 
 #topBar {
   display:flex;
-  justify-content:space-between;
   flex-wrap:wrap;
   gap:10px;
+  justify-content:space-between;
   margin-top:15px;
 }
 
-table { width:100%; margin-top:20px; border-collapse:collapse; }
-th,td { padding:10px; }
+table {
+  width:100%;
+  margin-top:20px;
+  border-collapse:collapse;
+}
+th, td {
+  padding:10px;
+}
 th { background:#12325b; }
 
-.kanban { display:flex; gap:10px; margin-top:20px; }
-.column { flex:1; background:#0f2a4c; padding:10px; border-radius:10px; }
-
-.game-card {
-  background:#12325b;
-  margin:5px 0;
-  padding:8px;
-  border-radius:8px;
+.kanban {
   display:flex;
-  justify-content:space-between;
+  gap:10px;
+  margin-top:20px;
+}
+.column {
+  flex:1;
+  background:#0f2a4c;
+  padding:10px;
+  border-radius:10px;
+}
+.game {
+  background:#12325b;
+  padding:6px;
+  margin:5px 0;
+  border-radius:6px;
 }
 </style>
 </head>
@@ -76,13 +87,8 @@ th { background:#12325b; }
   <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">PlayStation</div>
 </div>
 
-<!-- TOP BAR -->
+<!-- FILTRES -->
 <div id="topBar">
-
-  <div>
-    <button onclick="setView('table')" class="active">📋 Table</button>
-    <button onclick="setView('kanban')">📊 Kanban</button>
-  </div>
 
   <div>
     <button onclick="setStatus('all')" class="active">Tous</button>
@@ -92,7 +98,7 @@ th { background:#12325b; }
   </div>
 
   <div>
-    <input id="search" placeholder="🔍 Recherche..." oninput="applyFilters()">
+    <input id="search" placeholder="🔍 recherche..." oninput="applyFilters()">
   </div>
 
   <div>
@@ -104,13 +110,13 @@ th { background:#12325b; }
 </div>
 
 <!-- TABLE -->
-<table id="tableView"></table>
+<table id="table"></table>
 
 <!-- KANBAN -->
-<div class="kanban" id="kanbanView" style="display:none;">
-  <div class="column" id="col-buy"><h3>🛒 À acheter</h3></div>
-  <div class="column" id="col-progress"><h3>⏳ En cours</h3></div>
-  <div class="column" id="col-collection"><h3>🎮 Collection</h3></div>
+<div class="kanban" id="kanban" style="display:none;">
+  <div class="column" id="buy"><h3>🛒 À acheter</h3></div>
+  <div class="column" id="progress"><h3>⏳ En cours</h3></div>
+  <div class="column" id="collection"><h3>🎮 Collection</h3></div>
 </div>
 
 <script>
@@ -118,14 +124,15 @@ th { background:#12325b; }
 let allJeux = [];
 let jeuxConstructeur = [];
 
-let selectedConsole = "all";
 let selectedStatus = "all";
 let selectedView = "table";
 
-/* ---------------- LOAD DATA ---------------- */
+/* ---------------- LOAD ALL ---------------- */
 fetch('data/index.json')
 .then(r => r.json())
-.then(files => Promise.all(files.map(f => fetch('data/'+f).then(r=>r.json()))))
+.then(files => Promise.all(files.map(f =>
+  fetch('data/' + f).then(r => r.json())
+)))
 .then(res => {
   allJeux = res.flat();
   jeuxConstructeur = [...allJeux];
@@ -133,27 +140,11 @@ fetch('data/index.json')
   applyFilters();
 });
 
-/* ---------------- CONSTRUCTEUR ---------------- */
+/* ---------------- CONSTRUCTEUR (FIX IMPORTANT) ---------------- */
 function choisirConstructeur(type){
 
   document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-  document.getElementById('card-'+type).classList.add('active');
-
-  fetch(`data/${type}.json`)
-  .then(r => r.json())
-  .then(files => Promise.all(files.map(f => fetch('data/'+f).then(r=>r.json()))))
-  .then(res => {
-    jeuxConstructeur = res.flat();
-    initConsoles();
-    applyFilters();
-  });
-}
-
-/* ---------------- CONSOLES DYNAMIQUES ---------------- */
-function choisirConstructeur(type){
-
-  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-  document.getElementById('card-'+type).classList.add('active');
+  document.getElementById('card-' + type).classList.add('active');
 
   fetch(`data/${type}.json`)
     .then(r => r.json())
@@ -170,7 +161,6 @@ function choisirConstructeur(type){
     })
     .then(results => {
 
-      // 🔥 IMPORTANT : flatten comme avant
       jeuxConstructeur = results.flat();
 
       initConsoles();
@@ -178,27 +168,44 @@ function choisirConstructeur(type){
     });
 }
 
-/* ---------------- FILTRES ---------------- */
+/* ---------------- CONSOLES ---------------- */
+function initConsoles(){
+
+  const select = document.getElementById("consoleSelect");
+  select.innerHTML = `<option value="all">Toutes consoles</option>`;
+
+  const consoles = [...new Set(jeuxConstructeur.map(j => j.console))];
+
+  consoles.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+}
+
+/* ---------------- STATUS ---------------- */
 function setStatus(s){
   selectedStatus = s;
   applyFilters();
 }
 
-function setView(v){
-  selectedView = v;
-  applyFilters();
-}
-
+/* ---------------- FILTER ENGINE ---------------- */
 function applyFilters(){
 
   const search = document.getElementById("search").value.toLowerCase();
-  const consoleValue = document.getElementById("consoleSelect").value;
+  const consoleVal = document.getElementById("consoleSelect").value;
 
   let data = [...jeuxConstructeur];
 
-  if(consoleValue !== "all") data = data.filter(j => j.console === consoleValue);
-  if(selectedStatus !== "all") data = data.filter(j => j.statut === selectedStatus);
-  if(search) data = data.filter(j => j.nom.toLowerCase().includes(search));
+  if(consoleVal !== "all")
+    data = data.filter(j => j.console === consoleVal);
+
+  if(selectedStatus !== "all")
+    data = data.filter(j => j.statut === selectedStatus);
+
+  if(search)
+    data = data.filter(j => j.nom.toLowerCase().includes(search));
 
   render(data);
 }
@@ -207,10 +214,11 @@ function applyFilters(){
 function render(data){
 
   if(selectedView === "table"){
-    document.getElementById("tableView").style.display = "table";
-    document.getElementById("kanbanView").style.display = "none";
 
-    const table = document.getElementById("tableView");
+    document.getElementById("table").style.display = "table";
+    document.getElementById("kanban").style.display = "none";
+
+    const table = document.getElementById("table");
     table.innerHTML = `
       <tr><th>Nom</th><th>Console</th><th>Statut</th></tr>
     `;
@@ -224,24 +232,30 @@ function render(data){
         </tr>
       `;
     });
-  }
 
-  else {
-    document.getElementById("tableView").style.display = "none";
-    document.getElementById("kanbanView").style.display = "flex";
+  } else {
 
-    document.getElementById("col-buy").innerHTML = "<h3>🛒 À acheter</h3>";
-    document.getElementById("col-progress").innerHTML = "<h3>⏳ En cours</h3>";
-    document.getElementById("col-collection").innerHTML = "<h3>🎮 Collection</h3>";
+    document.getElementById("table").style.display = "none";
+    document.getElementById("kanban").style.display = "flex";
+
+    document.getElementById("buy").innerHTML = "<h3>🛒 À acheter</h3>";
+    document.getElementById("progress").innerHTML = "<h3>⏳ En cours</h3>";
+    document.getElementById("collection").innerHTML = "<h3>🎮 Collection</h3>";
 
     data.forEach(j => {
-      const div = document.createElement("div");
-      div.className = "game-card";
-      div.innerHTML = `<span>${j.nom}</span><span>${j.console}</span>`;
 
-      if(j.statut === "A_acheter") document.getElementById("col-buy").appendChild(div);
-      else if(j.statut === "Achat_en_cours") document.getElementById("col-progress").appendChild(div);
-      else document.getElementById("col-collection").appendChild(div);
+      const div = document.createElement("div");
+      div.className = "game";
+      div.textContent = j.nom;
+
+      if(j.statut === "A_acheter")
+        document.getElementById("buy").appendChild(div);
+
+      else if(j.statut === "Achat_en_cours")
+        document.getElementById("progress").appendChild(div);
+
+      else
+        document.getElementById("collection").appendChild(div);
     });
   }
 }
