@@ -3,263 +3,192 @@
 <head>
 <meta charset="UTF-8">
 <title>Ma Collection Gaming</title>
-
 <style>
-body { font-family: 'Segoe UI', sans-serif; background:#0b1e3b; color:#e0f7ff; padding:20px; }
-
-h1 { text-align:center; color:#00cfff; }
-
-.card {
-  display:inline-block;
-  padding:15px;
-  margin:10px;
-  background:#12325b;
-  color:#00cfff;
-  border-radius:12px;
-  cursor:pointer;
-}
+body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
+h1,h2 { color:#00cfff; text-align:center; margin-bottom:10px; }
+.card { display:inline-block; padding:20px; margin:10px; background:#12325b; color:#00cfff; border-radius:15px; cursor:pointer; transition:0.3s; }
+.card:hover { background:#1457a8; transform:scale(1.05); }
 .card.active { background:#00cfff; color:#0b1e3b; }
-
-button {
-  margin:3px;
-  padding:6px 10px;
-  border:none;
-  border-radius:8px;
-  background:#12325b;
-  color:#00cfff;
-  cursor:pointer;
-}
+select,input { padding:8px 12px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff; }
+input:focus { outline:none; box-shadow:0 0 8px #00cfff; }
+button { margin:0 5px; padding:6px 12px; background:#12325b; color:#00cfff; border:none; border-radius:8px; cursor:pointer; }
+button:hover { background:#1457a8; }
 button.active { background:#00cfff; color:#0b1e3b; }
-
-input, select {
-  padding:6px;
-  border-radius:8px;
-  border:none;
-  background:#12325b;
-  color:#e0f7ff;
-}
-
-#topBar {
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:space-between;
-  margin-top:15px;
-}
-
-table {
-  width:100%;
-  margin-top:20px;
-  border-collapse:collapse;
-}
-th, td {
-  padding:10px;
-}
-th { background:#12325b; }
-
-.kanban {
-  display:flex;
-  gap:10px;
-  margin-top:20px;
-}
-.column {
-  flex:1;
-  background:#0f2a4c;
-  padding:10px;
-  border-radius:10px;
-}
-.game {
-  background:#12325b;
-  padding:6px;
-  margin:5px 0;
-  border-radius:6px;
+table { width:100%; border-collapse:collapse; margin-top:10px; box-shadow:0 0 10px #00cfff66; }
+th,td { padding:12px; text-align:left; }
+th { background:#12325b; color:#00cfff; }
+tr:nth-child(even) { background:#0f2a4c; }
+tr:hover { background:#1457a8; }
+td img.logo { width: 32px; height: 32px; margin-right: 8px; vertical-align: middle; object-fit: contain; background-color: #12325b; border-radius: 4px; padding: 2px; box-shadow: 0 0 4px #00cfff77; }
+#compteur { display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff; }
+#statusSearchContainer { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+@media(max-width:768px){
+  #statusSearchContainer{flex-direction:column; align-items:flex-start;}
+  #statusSearchContainer div{margin:5px 0;}
 }
 </style>
 </head>
-
 <body>
 
 <h1>🎮 Ma Collection Gaming</h1>
 
-<!-- CONSTRUCTEURS -->
 <div style="text-align:center;">
   <div class="card" id="card-nintendo" onclick="choisirConstructeur('nintendo')">Nintendo</div>
   <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">PlayStation</div>
 </div>
 
-<!-- FILTRES -->
-<div id="topBar">
-
-  <div>
-    <button onclick="setStatus('all')" class="active">Tous</button>
-    <button onclick="setStatus('Collection')">🎮 Collection</button>
-    <button onclick="setStatus('A_acheter')">🛒 À acheter</button>
-    <button onclick="setStatus('Achat_en_cours')">⏳ En cours</button>
-  </div>
-
-  <div>
-    <input id="search" placeholder="🔍 recherche..." oninput="applyFilters()">
-  </div>
-
-  <div>
-    <select id="consoleSelect" onchange="applyFilters()">
-      <option value="all">Toutes consoles</option>
-    </select>
-  </div>
-
+<div id="consoleContainer" style="text-align:center; margin-top:20px; display:none;">
+  <select id="consoleSelect" onchange="appliquerFiltres()"></select>
 </div>
 
-<!-- TABLE -->
-<table id="table"></table>
-
-<!-- KANBAN -->
-<div class="kanban" id="kanban" style="display:none;">
-  <div class="column" id="buy"><h3>🛒 À acheter</h3></div>
-  <div class="column" id="progress"><h3>⏳ En cours</h3></div>
-  <div class="column" id="collection"><h3>🎮 Collection</h3></div>
+<div id="statusSearchContainer">
+  <div>
+    <button onclick="filtrerStatut(event,'all')" class="active">Tous</button>
+    <button onclick="filtrerStatut(event,'Collection')">🎮 Collection</button>
+    <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
+    <button onclick="filtrerStatut(event,'Achat_en_cours')">⏳ Achat en cours</button>
+  </div>
+  <div>
+    <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
+  </div>
 </div>
+
+<table id="jeuxTable"></table>
+<div id="compteur"></div>
 
 <script>
-
-let allJeux = [];
+let allJeuxData = [];
 let jeuxConstructeur = [];
+let jeuxData = [];
+let statutActuel = "all";
+let consoleChoisie = null;
 
-let selectedStatus = "all";
-let selectedView = "table";
-
-/* ---------------- LOAD ALL ---------------- */
+// Charger tous les jeux à l'accueil
 fetch('data/index.json')
-.then(r => r.json())
-.then(files => Promise.all(files.map(f =>
-  fetch('data/' + f).then(r => r.json())
-)))
-.then(res => {
-  allJeux = res.flat();
-  jeuxConstructeur = [...allJeux];
-  initConsoles();
-  applyFilters();
-});
+  .then(r => r.json())
+  .then(fichiers => {
+    const chemins = fichiers.map(f => 'data/' + f);
+    return Promise.all(chemins.map(f =>
+      fetch(f)
+        .then(r => r.json())
+        .then(data => Array.isArray(data) ? data : [])
+        .catch(err => { console.warn("JSON vide ou invalide:", f); return []; })
+    ));
+  })
+  .then(results => {
+    results.forEach(arr => allJeuxData.push(...arr));
+    allJeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+    jeuxConstructeur = [...allJeuxData];
+    jeuxData = [...allJeuxData];
+    afficherJeux(jeuxData, false);
+    document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
+  });
 
-/* ---------------- CONSTRUCTEUR (FIX IMPORTANT) ---------------- */
+// Choisir constructeur
 function choisirConstructeur(type){
-
-  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-  document.getElementById('card-' + type).classList.add('active');
+  document.getElementById("card-nintendo").classList.remove("active");
+  document.getElementById("card-sony").classList.remove("active");
+  document.getElementById("card-"+type).classList.add("active");
 
   fetch(`data/${type}.json`)
     .then(r => r.json())
-    .then(files => {
-
-      return Promise.all(
-        files.map(f =>
-          fetch('data/' + f)
-            .then(r => r.json())
-            .catch(() => [])
-        )
-      );
-
+    .then(listeJson => {
+      const chemins = listeJson.map(f=>'data/'+f);
+      return Promise.all(chemins.map(f =>
+        fetch(f)
+          .then(r => r.json())
+          .then(data => Array.isArray(data)? data: [])
+          .catch(err => { console.warn("JSON vide ou invalide:", f); return []; })
+      ));
     })
     .then(results => {
+      jeuxConstructeur = [];
+      results.forEach(arr => jeuxConstructeur.push(...arr));
+      jeuxConstructeur.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
 
-      jeuxConstructeur = results.flat();
+      // Mettre à jour le select
+      const select = document.getElementById("consoleSelect");
+      select.innerHTML = '<option value="all">Toutes les consoles</option>';
+      const consoles = [...new Set(jeuxConstructeur.map(j=>j.console))];
+      consoles.forEach(c=>{
+        const opt=document.createElement("option");
+        opt.value=c; opt.textContent=c;
+        select.appendChild(opt);
+      });
+      document.getElementById("consoleContainer").style.display="block";
 
-      initConsoles();
-      applyFilters();
+      // Reset filtres
+      document.getElementById("searchInput").value="";
+      statutActuel="all";
+      consoleChoisie = null;
+      document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+      document.querySelector("button[onclick*='all']").classList.add("active");
+
+      jeuxData = [...jeuxConstructeur];
+      afficherJeux(jeuxData, false);
+      document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
     });
 }
 
-/* ---------------- CONSOLES ---------------- */
-function initConsoles(){
-
+// Appliquer filtres
+function appliquerFiltres(){
+  let result = [...jeuxConstructeur];
+  const search = document.getElementById("searchInput").value.toLowerCase();
   const select = document.getElementById("consoleSelect");
-  select.innerHTML = `<option value="all">Toutes consoles</option>`;
 
-  const consoles = [...new Set(jeuxConstructeur.map(j => j.console))];
+  consoleChoisie = select && select.value !== "all" ? select.value : null;
 
-  consoles.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    select.appendChild(opt);
+  if(consoleChoisie) result = result.filter(j=>j.console === consoleChoisie);
+  if(search) result = result.filter(j=>j.nom.toLowerCase().includes(search));
+  if(statutActuel !== "all") result = result.filter(j=>j.statut === statutActuel);
+
+  jeuxData = result;
+  afficherJeux(result, !!consoleChoisie);
+  document.getElementById("compteur").textContent = result.length + " jeu(x)";
+}
+
+// Filtrer par statut
+function filtrerStatut(e,val){
+  statutActuel = val;
+  document.querySelectorAll("#statusSearchContainer button").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active");
+  appliquerFiltres();
+}
+
+// Affichage du tableau
+function afficherJeux(liste, cacherConsole){
+  const table = document.getElementById("jeuxTable");
+  table.innerHTML = '';
+  if(liste.length === 0) return;
+
+  // Entête
+  const header = table.insertRow();
+  header.insertCell().outerHTML="<th>Nom du jeu</th>";
+  if(!cacherConsole) header.insertCell().outerHTML="<th>Console</th>";
+  header.insertCell().outerHTML="<th>Statut</th>";
+
+  // Lignes
+  liste.forEach(j => {
+    const row = table.insertRow();
+    const nameCell = row.insertCell();
+    if(j.logo){
+      const img = document.createElement('img');
+      img.src = j.logo;
+      img.className = "logo";
+      nameCell.appendChild(img);
+    }
+    const span = document.createElement('span');
+    span.textContent = j.nom;
+    nameCell.appendChild(span);
+
+    if(!cacherConsole){
+      row.insertCell().textContent = j.console;
+    }
+
+    const statutCell = row.insertCell();
+    statutCell.textContent = j.icone || '';
   });
 }
-
-/* ---------------- STATUS ---------------- */
-function setStatus(s){
-  selectedStatus = s;
-  applyFilters();
-}
-
-/* ---------------- FILTER ENGINE ---------------- */
-function applyFilters(){
-
-  const search = document.getElementById("search").value.toLowerCase();
-  const consoleVal = document.getElementById("consoleSelect").value;
-
-  let data = [...jeuxConstructeur];
-
-  if(consoleVal !== "all")
-    data = data.filter(j => j.console === consoleVal);
-
-  if(selectedStatus !== "all")
-    data = data.filter(j => j.statut === selectedStatus);
-
-  if(search)
-    data = data.filter(j => j.nom.toLowerCase().includes(search));
-
-  render(data);
-}
-
-/* ---------------- RENDER ---------------- */
-function render(data){
-
-  if(selectedView === "table"){
-
-    document.getElementById("table").style.display = "table";
-    document.getElementById("kanban").style.display = "none";
-
-    const table = document.getElementById("table");
-    table.innerHTML = `
-      <tr><th>Nom</th><th>Console</th><th>Statut</th></tr>
-    `;
-
-    data.forEach(j => {
-      table.innerHTML += `
-        <tr>
-          <td>${j.nom}</td>
-          <td>${j.console}</td>
-          <td>${j.statut}</td>
-        </tr>
-      `;
-    });
-
-  } else {
-
-    document.getElementById("table").style.display = "none";
-    document.getElementById("kanban").style.display = "flex";
-
-    document.getElementById("buy").innerHTML = "<h3>🛒 À acheter</h3>";
-    document.getElementById("progress").innerHTML = "<h3>⏳ En cours</h3>";
-    document.getElementById("collection").innerHTML = "<h3>🎮 Collection</h3>";
-
-    data.forEach(j => {
-
-      const div = document.createElement("div");
-      div.className = "game";
-      div.textContent = j.nom;
-
-      if(j.statut === "A_acheter")
-        document.getElementById("buy").appendChild(div);
-
-      else if(j.statut === "Achat_en_cours")
-        document.getElementById("progress").appendChild(div);
-
-      else
-        document.getElementById("collection").appendChild(div);
-    });
-  }
-}
-
 </script>
 
 </body>
