@@ -317,7 +317,7 @@
   {
     "nom": "Disney Tarzan",
     "console": "PS1",
-    "statut": "A_acheter",
+    "statut": "Achat_en_cours",
     "icone": "⏳",
     "logo": "images/logo-playstation.png"
   }
