@@ -5,189 +5,180 @@
 <title>Ma Collection Gaming</title>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
-h1,h2 { color:#00cfff; text-align:center; margin-bottom:10px; }
+h1 { color:#00cfff; text-align:center; margin-bottom:10px; }
+
+/* Cards constructeur */
 .card { display:inline-block; padding:20px; margin:10px; background:#12325b; color:#00cfff; border-radius:15px; cursor:pointer; transition:0.3s; }
 .card:hover { background:#1457a8; transform:scale(1.05); }
 .card.active { background:#00cfff; color:#0b1e3b; }
+
 select,input { padding:8px 12px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff; }
 input:focus { outline:none; box-shadow:0 0 8px #00cfff; }
+
 button { margin:0 5px; padding:6px 12px; background:#12325b; color:#00cfff; border:none; border-radius:8px; cursor:pointer; }
 button:hover { background:#1457a8; }
 button.active { background:#00cfff; color:#0b1e3b; }
-table { width:100%; border-collapse:collapse; margin-top:10px; box-shadow:0 0 10px #00cfff66; }
-th,td { padding:12px; text-align:left; }
-th { background:#12325b; color:#00cfff; }
-tr:nth-child(even) { background:#0f2a4c; }
-tr:hover { background:#1457a8; }
-td img.logo { width: 32px; height: 32px; margin-right: 8px; vertical-align: middle; object-fit: contain; background-color: #12325b; border-radius: 4px; padding: 2px; box-shadow: 0 0 4px #00cfff77; }
-#compteur { display:flex; justify-content:flex-end; margin-top:10px; font-weight:bold; color:#00cfff; }
-#statusSearchContainer { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-@media(max-width:768px){
-  #statusSearchContainer{flex-direction:column; align-items:flex-start;}
-  #statusSearchContainer div{margin:5px 0;}
+
+/* Kanban */
+.kanban {
+  display:flex;
+  gap:15px;
+  margin-top:20px;
+  align-items:flex-start;
 }
+.column {
+  flex:1;
+  background:#0f2a4c;
+  border-radius:15px;
+  padding:10px;
+  min-height:300px;
+  box-shadow:0 0 10px #00cfff33;
+}
+.column h2 {
+  text-align:center;
+  color:#00cfff;
+}
+
+.game-card {
+  background:#12325b;
+  margin:10px 0;
+  padding:10px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* Badge statut */
+.badge {
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:bold;
+}
+.badge.collection { background:#00cfff; color:#0b1e3b; }
+.badge.a_acheter { background:#ffb020; color:#0b1e3b; }
+.badge.en_cours { background:#7c5cff; color:white; }
+
+#statusSearchContainer { display:flex; justify-content:space-between; align-items:center; margin-top:15px; }
+
 </style>
 </head>
 <body>
 
-<h1>🎮 Ma Collection Gaming</h1>
+<h1>🎮 Ma Collection Gaming (Kanban)</h1>
 
 <div style="text-align:center;">
   <div class="card" id="card-nintendo" onclick="choisirConstructeur('nintendo')">Nintendo</div>
   <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">PlayStation</div>
 </div>
 
-<div id="consoleContainer" style="text-align:center; margin-top:20px; display:none;">
-  <select id="consoleSelect" onchange="appliquerFiltres()"></select>
-</div>
-
 <div id="statusSearchContainer">
   <div>
-    <button onclick="filtrerStatut(event,'all')" class="active">Tous</button>
-    <button onclick="filtrerStatut(event,'Collection')">🎮 Collection</button>
-    <button onclick="filtrerStatut(event,'A_acheter')">🛒 À acheter</button>
-    <button onclick="filtrerStatut(event,'Achat_en_cours')">⏳ Achat en cours</button>
+    <button onclick="setView('all')" class="active">Tous</button>
+    <button onclick="setView('kanban')">📊 Kanban</button>
   </div>
-  <div>
-    <input id="searchInput" placeholder="🔍 Rechercher..." oninput="appliquerFiltres()">
+  <input id="searchInput" placeholder="🔍 Rechercher..." oninput="render()">
+</div>
+
+<!-- LISTE (fallback) -->
+<table id="tableView" style="width:100%; margin-top:20px;"></table>
+
+<!-- KANBAN -->
+<div class="kanban" id="kanbanView" style="display:none;">
+  <div class="column" id="toBuy">
+    <h2>🛒 À acheter</h2>
+  </div>
+  <div class="column" id="inProgress">
+    <h2>⏳ En cours</h2>
+  </div>
+  <div class="column" id="collection">
+    <h2>🎮 Collection</h2>
   </div>
 </div>
 
-<table id="jeuxTable"></table>
-<div id="compteur"></div>
-
 <script>
-let allJeuxData = [];
-let jeuxConstructeur = [];
-let jeuxData = [];
-let statutActuel = "all";
-let consoleChoisie = null;
+let allJeux = [];
+let viewMode = 'all';
 
-// Charger tous les jeux à l'accueil
 fetch('data/index.json')
   .then(r => r.json())
-  .then(fichiers => {
-    const chemins = fichiers.map(f => 'data/' + f);
-    return Promise.all(chemins.map(f =>
-      fetch(f)
-        .then(r => r.json())
-        .then(data => Array.isArray(data) ? data : [])
-        .catch(err => { console.warn("JSON vide ou invalide:", f); return []; })
-    ));
-  })
+  .then(files => Promise.all(files.map(f => fetch('data/' + f).then(r => r.json()))))
   .then(results => {
-    results.forEach(arr => allJeuxData.push(...arr));
-    allJeuxData.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
-    jeuxConstructeur = [...allJeuxData];
-    jeuxData = [...allJeuxData];
-    afficherJeux(jeuxData, false);
-    document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
+    allJeux = results.flat();
+    render();
   });
 
-// Choisir constructeur
-function choisirConstructeur(type){
-  document.getElementById("card-nintendo").classList.remove("active");
-  document.getElementById("card-sony").classList.remove("active");
-  document.getElementById("card-"+type).classList.add("active");
-
-  fetch(`data/${type}.json`)
-    .then(r => r.json())
-    .then(listeJson => {
-      const chemins = listeJson.map(f=>'data/'+f);
-      return Promise.all(chemins.map(f =>
-        fetch(f)
-          .then(r => r.json())
-          .then(data => Array.isArray(data)? data: [])
-          .catch(err => { console.warn("JSON vide ou invalide:", f); return []; })
-      ));
-    })
-    .then(results => {
-      jeuxConstructeur = [];
-      results.forEach(arr => jeuxConstructeur.push(...arr));
-      jeuxConstructeur.sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
-
-      // Mettre à jour le select
-      const select = document.getElementById("consoleSelect");
-      select.innerHTML = '<option value="all">Toutes les consoles</option>';
-      const consoles = [...new Set(jeuxConstructeur.map(j=>j.console))];
-      consoles.forEach(c=>{
-        const opt=document.createElement("option");
-        opt.value=c; opt.textContent=c;
-        select.appendChild(opt);
-      });
-      document.getElementById("consoleContainer").style.display="block";
-
-      // Reset filtres
-      document.getElementById("searchInput").value="";
-      statutActuel="all";
-      consoleChoisie = null;
-      document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-      document.querySelector("button[onclick*='all']").classList.add("active");
-
-      jeuxData = [...jeuxConstructeur];
-      afficherJeux(jeuxData, false);
-      document.getElementById("compteur").textContent = jeuxData.length + " jeu(x)";
-    });
+function setView(mode){
+  viewMode = mode;
+  render();
 }
 
-// Appliquer filtres
-function appliquerFiltres(){
-  let result = [...jeuxConstructeur];
-  const search = document.getElementById("searchInput").value.toLowerCase();
-  const select = document.getElementById("consoleSelect");
+function render(){
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let data = allJeux.filter(j => j.nom.toLowerCase().includes(search));
 
-  consoleChoisie = select && select.value !== "all" ? select.value : null;
-
-  if(consoleChoisie) result = result.filter(j=>j.console === consoleChoisie);
-  if(search) result = result.filter(j=>j.nom.toLowerCase().includes(search));
-  if(statutActuel !== "all") result = result.filter(j=>j.statut === statutActuel);
-
-  jeuxData = result;
-  afficherJeux(result, !!consoleChoisie);
-  document.getElementById("compteur").textContent = result.length + " jeu(x)";
+  if(viewMode === 'kanban') renderKanban(data);
+  else renderTable(data);
 }
 
-// Filtrer par statut
-function filtrerStatut(e,val){
-  statutActuel = val;
-  document.querySelectorAll("#statusSearchContainer button").forEach(b=>b.classList.remove("active"));
-  e.target.classList.add("active");
-  appliquerFiltres();
-}
+function renderTable(data){
+  document.getElementById('kanbanView').style.display='none';
+  document.getElementById('tableView').style.display='table';
 
-// Affichage du tableau
-function afficherJeux(liste, cacherConsole){
-  const table = document.getElementById("jeuxTable");
-  table.innerHTML = '';
-  if(liste.length === 0) return;
+  const table = document.getElementById('tableView');
+  table.innerHTML='';
 
-  // Entête
   const header = table.insertRow();
-  header.insertCell().outerHTML="<th>Nom du jeu</th>";
-  if(!cacherConsole) header.insertCell().outerHTML="<th>Console</th>";
-  header.insertCell().outerHTML="<th>Statut</th>";
+  header.innerHTML = '<th>Nom</th><th>Console</th><th>Statut</th>';
 
-  // Lignes
-  liste.forEach(j => {
+  data.forEach(j => {
     const row = table.insertRow();
-    const nameCell = row.insertCell();
-    if(j.logo){
-      const img = document.createElement('img');
-      img.src = j.logo;
-      img.className = "logo";
-      nameCell.appendChild(img);
-    }
-    const span = document.createElement('span');
-    span.textContent = j.nom;
-    nameCell.appendChild(span);
-
-    if(!cacherConsole){
-      row.insertCell().textContent = j.console;
-    }
-
-    const statutCell = row.insertCell();
-    statutCell.textContent = j.icone || '';
+    row.innerHTML = `
+      <td>${j.nom}</td>
+      <td>${j.console}</td>
+      <td><span class="badge ${getClass(j.statut)}">${getIcon(j.statut)} ${format(j.statut)}</span></td>
+    `;
   });
+}
+
+function renderKanban(data){
+  document.getElementById('kanbanView').style.display='flex';
+  document.getElementById('tableView').style.display='none';
+
+  document.getElementById('toBuy').innerHTML = '<h2>🛒 À acheter</h2>';
+  document.getElementById('inProgress').innerHTML = '<h2>⏳ En cours</h2>';
+  document.getElementById('collection').innerHTML = '<h2>🎮 Collection</h2>';
+
+  data.forEach(j => {
+    const div = document.createElement('div');
+    div.className='game-card';
+    div.innerHTML = `<span>${j.nom}</span><span class="badge ${getClass(j.statut)}">${getIcon(j.statut)}</span>`;
+
+    if(j.statut === 'A_acheter') document.getElementById('toBuy').appendChild(div);
+    else if(j.statut === 'Achat_en_cours') document.getElementById('inProgress').appendChild(div);
+    else document.getElementById('collection').appendChild(div);
+  });
+}
+
+function getIcon(s){
+  if(s==='Collection') return '🎮';
+  if(s==='A_acheter') return '🛒';
+  if(s==='Achat_en_cours') return '⏳';
+  return '';
+}
+
+function getClass(s){
+  if(s==='Collection') return 'collection';
+  if(s==='A_acheter') return 'a_acheter';
+  if(s==='Achat_en_cours') return 'en_cours';
+  return '';
+}
+
+function format(s){
+  if(s==='A_acheter') return 'À acheter';
+  if(s==='Achat_en_cours') return 'En cours';
+  return s;
 }
 </script>
 
