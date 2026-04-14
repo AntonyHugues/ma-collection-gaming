@@ -150,18 +150,32 @@ function choisirConstructeur(type){
 }
 
 /* ---------------- CONSOLES DYNAMIQUES ---------------- */
-function initConsoles(){
-  const select = document.getElementById("consoleSelect");
-  select.innerHTML = `<option value="all">Toutes consoles</option>`;
+function choisirConstructeur(type){
 
-  const consoles = [...new Set(jeuxConstructeur.map(j => j.console))];
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-'+type).classList.add('active');
 
-  consoles.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    select.appendChild(opt);
-  });
+  fetch(`data/${type}.json`)
+    .then(r => r.json())
+    .then(files => {
+
+      return Promise.all(
+        files.map(f =>
+          fetch('data/' + f)
+            .then(r => r.json())
+            .catch(() => [])
+        )
+      );
+
+    })
+    .then(results => {
+
+      // 🔥 IMPORTANT : flatten comme avant
+      jeuxConstructeur = results.flat();
+
+      initConsoles();
+      applyFilters();
+    });
 }
 
 /* ---------------- FILTRES ---------------- */
