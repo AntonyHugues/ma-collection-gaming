@@ -3,183 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <title>Ma Collection Gaming</title>
-<style>
-body { font-family: 'Segoe UI', sans-serif; background: #0b1e3b; color: #e0f7ff; padding: 20px; }
-h1 { color:#00cfff; text-align:center; margin-bottom:10px; }
 
-/* Cards constructeur */
-.card { display:inline-block; padding:20px; margin:10px; background:#12325b; color:#00cfff; border-radius:15px; cursor:pointer; transition:0.3s; }
+<style>
+body { font-family: 'Segoe UI', sans-serif; background:#0b1e3b; color:#e0f7ff; padding:20px; }
+
+h1 { color:#00cfff; text-align:center; }
+
+.card {
+  display:inline-block;
+  padding:20px;
+  margin:10px;
+  background:#12325b;
+  color:#00cfff;
+  border-radius:15px;
+  cursor:pointer;
+}
 .card:hover { background:#1457a8; transform:scale(1.05); }
 .card.active { background:#00cfff; color:#0b1e3b; }
 
-select,input { padding:8px 12px; border-radius:8px; border:none; background:#12325b; color:#e0f7ff; }
-input:focus { outline:none; box-shadow:0 0 8px #00cfff; }
-
-button { margin:0 5px; padding:6px 12px; background:#12325b; color:#00cfff; border:none; border-radius:8px; cursor:pointer; }
-button:hover { background:#1457a8; }
+button {
+  margin:4px;
+  padding:6px 10px;
+  border:none;
+  border-radius:8px;
+  background:#12325b;
+  color:#00cfff;
+  cursor:pointer;
+}
 button.active { background:#00cfff; color:#0b1e3b; }
 
-/* Kanban */
-.kanban {
+input, select {
+  padding:8px;
+  border-radius:8px;
+  border:none;
+  background:#12325b;
+  color:#e0f7ff;
+}
+
+#topBar {
   display:flex;
-  gap:15px;
-  margin-top:20px;
-  align-items:flex-start;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:15px;
 }
-.column {
-  flex:1;
-  background:#0f2a4c;
-  border-radius:15px;
-  padding:10px;
-  min-height:300px;
-  box-shadow:0 0 10px #00cfff33;
-}
-.column h2 {
-  text-align:center;
-  color:#00cfff;
-}
+
+table { width:100%; margin-top:20px; border-collapse:collapse; }
+th,td { padding:10px; }
+th { background:#12325b; }
+
+.kanban { display:flex; gap:10px; margin-top:20px; }
+.column { flex:1; background:#0f2a4c; padding:10px; border-radius:10px; }
 
 .game-card {
   background:#12325b;
-  margin:10px 0;
-  padding:10px;
-  border-radius:10px;
+  margin:5px 0;
+  padding:8px;
+  border-radius:8px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
 }
-
-/* Badge statut */
-.badge {
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:bold;
-}
-.badge.collection { background:#00cfff; color:#0b1e3b; }
-.badge.a_acheter { background:#ffb020; color:#0b1e3b; }
-.badge.en_cours { background:#7c5cff; color:white; }
-
-#statusSearchContainer { display:flex; justify-content:space-between; align-items:center; margin-top:15px; }
-
 </style>
 </head>
+
 <body>
 
-<h1>🎮 Ma Collection Gaming (Kanban)</h1>
+<h1>🎮 Ma Collection Gaming</h1>
 
+<!-- CONSTRUCTEURS -->
 <div style="text-align:center;">
   <div class="card" id="card-nintendo" onclick="choisirConstructeur('nintendo')">Nintendo</div>
   <div class="card" id="card-sony" onclick="choisirConstructeur('sony')">PlayStation</div>
 </div>
 
-<div id="statusSearchContainer">
+<!-- TOP BAR -->
+<div id="topBar">
+
   <div>
-    <button onclick="setView('all')" class="active">Tous</button>
+    <button onclick="setView('table')" class="active">📋 Table</button>
     <button onclick="setView('kanban')">📊 Kanban</button>
   </div>
-  <input id="searchInput" placeholder="🔍 Rechercher..." oninput="render()">
+
+  <div>
+    <button onclick="setStatus('all')" class="active">Tous</button>
+    <button onclick="setStatus('Collection')">🎮 Collection</button>
+    <button onclick="setStatus('A_acheter')">🛒 À acheter</button>
+    <button onclick="setStatus('Achat_en_cours')">⏳ En cours</button>
+  </div>
+
+  <div>
+    <input id="search" placeholder="🔍 Recherche..." oninput="applyFilters()">
+  </div>
+
+  <div>
+    <select id="consoleSelect" onchange="applyFilters()">
+      <option value="all">Toutes consoles</option>
+    </select>
+  </div>
+
 </div>
 
-<!-- LISTE (fallback) -->
-<table id="tableView" style="width:100%; margin-top:20px;"></table>
+<!-- TABLE -->
+<table id="tableView"></table>
 
 <!-- KANBAN -->
 <div class="kanban" id="kanbanView" style="display:none;">
-  <div class="column" id="toBuy">
-    <h2>🛒 À acheter</h2>
-  </div>
-  <div class="column" id="inProgress">
-    <h2>⏳ En cours</h2>
-  </div>
-  <div class="column" id="collection">
-    <h2>🎮 Collection</h2>
-  </div>
+  <div class="column" id="col-buy"><h3>🛒 À acheter</h3></div>
+  <div class="column" id="col-progress"><h3>⏳ En cours</h3></div>
+  <div class="column" id="col-collection"><h3>🎮 Collection</h3></div>
 </div>
 
 <script>
+
 let allJeux = [];
-let viewMode = 'all';
+let jeuxConstructeur = [];
 
+let selectedConsole = "all";
+let selectedStatus = "all";
+let selectedView = "table";
+
+/* ---------------- LOAD DATA ---------------- */
 fetch('data/index.json')
+.then(r => r.json())
+.then(files => Promise.all(files.map(f => fetch('data/'+f).then(r=>r.json()))))
+.then(res => {
+  allJeux = res.flat();
+  jeuxConstructeur = [...allJeux];
+  initConsoles();
+  applyFilters();
+});
+
+/* ---------------- CONSTRUCTEUR ---------------- */
+function choisirConstructeur(type){
+
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-'+type).classList.add('active');
+
+  fetch(`data/${type}.json`)
   .then(r => r.json())
-  .then(files => Promise.all(files.map(f => fetch('data/' + f).then(r => r.json()))))
-  .then(results => {
-    allJeux = results.flat();
-    render();
+  .then(files => Promise.all(files.map(f => fetch('data/'+f).then(r=>r.json()))))
+  .then(res => {
+    jeuxConstructeur = res.flat();
+    initConsoles();
+    applyFilters();
   });
-
-function setView(mode){
-  viewMode = mode;
-  render();
 }
 
-function render(){
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  let data = allJeux.filter(j => j.nom.toLowerCase().includes(search));
+/* ---------------- CONSOLES DYNAMIQUES ---------------- */
+function initConsoles(){
+  const select = document.getElementById("consoleSelect");
+  select.innerHTML = `<option value="all">Toutes consoles</option>`;
 
-  if(viewMode === 'kanban') renderKanban(data);
-  else renderTable(data);
+  const consoles = [...new Set(jeuxConstructeur.map(j => j.console))];
+
+  consoles.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
 }
 
-function renderTable(data){
-  document.getElementById('kanbanView').style.display='none';
-  document.getElementById('tableView').style.display='table';
+/* ---------------- FILTRES ---------------- */
+function setStatus(s){
+  selectedStatus = s;
+  applyFilters();
+}
 
-  const table = document.getElementById('tableView');
-  table.innerHTML='';
+function setView(v){
+  selectedView = v;
+  applyFilters();
+}
 
-  const header = table.insertRow();
-  header.innerHTML = '<th>Nom</th><th>Console</th><th>Statut</th>';
+function applyFilters(){
 
-  data.forEach(j => {
-    const row = table.insertRow();
-    row.innerHTML = `
-      <td>${j.nom}</td>
-      <td>${j.console}</td>
-      <td><span class="badge ${getClass(j.statut)}">${getIcon(j.statut)} ${format(j.statut)}</span></td>
+  const search = document.getElementById("search").value.toLowerCase();
+  const consoleValue = document.getElementById("consoleSelect").value;
+
+  let data = [...jeuxConstructeur];
+
+  if(consoleValue !== "all") data = data.filter(j => j.console === consoleValue);
+  if(selectedStatus !== "all") data = data.filter(j => j.statut === selectedStatus);
+  if(search) data = data.filter(j => j.nom.toLowerCase().includes(search));
+
+  render(data);
+}
+
+/* ---------------- RENDER ---------------- */
+function render(data){
+
+  if(selectedView === "table"){
+    document.getElementById("tableView").style.display = "table";
+    document.getElementById("kanbanView").style.display = "none";
+
+    const table = document.getElementById("tableView");
+    table.innerHTML = `
+      <tr><th>Nom</th><th>Console</th><th>Statut</th></tr>
     `;
-  });
+
+    data.forEach(j => {
+      table.innerHTML += `
+        <tr>
+          <td>${j.nom}</td>
+          <td>${j.console}</td>
+          <td>${j.statut}</td>
+        </tr>
+      `;
+    });
+  }
+
+  else {
+    document.getElementById("tableView").style.display = "none";
+    document.getElementById("kanbanView").style.display = "flex";
+
+    document.getElementById("col-buy").innerHTML = "<h3>🛒 À acheter</h3>";
+    document.getElementById("col-progress").innerHTML = "<h3>⏳ En cours</h3>";
+    document.getElementById("col-collection").innerHTML = "<h3>🎮 Collection</h3>";
+
+    data.forEach(j => {
+      const div = document.createElement("div");
+      div.className = "game-card";
+      div.innerHTML = `<span>${j.nom}</span><span>${j.console}</span>`;
+
+      if(j.statut === "A_acheter") document.getElementById("col-buy").appendChild(div);
+      else if(j.statut === "Achat_en_cours") document.getElementById("col-progress").appendChild(div);
+      else document.getElementById("col-collection").appendChild(div);
+    });
+  }
 }
 
-function renderKanban(data){
-  document.getElementById('kanbanView').style.display='flex';
-  document.getElementById('tableView').style.display='none';
-
-  document.getElementById('toBuy').innerHTML = '<h2>🛒 À acheter</h2>';
-  document.getElementById('inProgress').innerHTML = '<h2>⏳ En cours</h2>';
-  document.getElementById('collection').innerHTML = '<h2>🎮 Collection</h2>';
-
-  data.forEach(j => {
-    const div = document.createElement('div');
-    div.className='game-card';
-    div.innerHTML = `<span>${j.nom}</span><span class="badge ${getClass(j.statut)}">${getIcon(j.statut)}</span>`;
-
-    if(j.statut === 'A_acheter') document.getElementById('toBuy').appendChild(div);
-    else if(j.statut === 'Achat_en_cours') document.getElementById('inProgress').appendChild(div);
-    else document.getElementById('collection').appendChild(div);
-  });
-}
-
-function getIcon(s){
-  if(s==='Collection') return '🎮';
-  if(s==='A_acheter') return '🛒';
-  if(s==='Achat_en_cours') return '⏳';
-  return '';
-}
-
-function getClass(s){
-  if(s==='Collection') return 'collection';
-  if(s==='A_acheter') return 'a_acheter';
-  if(s==='Achat_en_cours') return 'en_cours';
-  return '';
-}
-
-function format(s){
-  if(s==='A_acheter') return 'À acheter';
-  if(s==='Achat_en_cours') return 'En cours';
-  return s;
-}
 </script>
 
 </body>
